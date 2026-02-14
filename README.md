@@ -20,6 +20,8 @@ Problem: Fixed-timer signals. Objectives: Adaptive control. Approach: Q-learning
 Capstone_project/
 │── README.md
 │── .gitignore
+│── requirements.txt
+│── CONTRIBUTING.md
 │
 ├── docs/              # reports, PPT, diagrams
 │   ├── proposal/
