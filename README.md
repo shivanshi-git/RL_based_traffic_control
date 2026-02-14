@@ -15,6 +15,32 @@ Problem: Fixed-timer signals. Objectives: Adaptive control. Approach: Q-learning
 - Backend:
 - Database:
 - Tools:
+  
+## Folder Structure
+Capstone_project/
+│── README.md
+│── .gitignore
+│
+├── docs/              # reports, PPT, diagrams
+│   ├── proposal/
+│   ├── review/
+│   └── final-report/
+│
+├── src/               # main source code
+│   ├── backend/
+│   ├── frontend/
+│   └── ml-model/
+│
+├── data/              # datasets
+│   ├── raw/
+│   └── processed/
+│
+├── tests/             # test cases
+│
+├── scripts/           # helper scripts
+│
+└── docker/            # Docker-related files (later)
+
 
 ## Project Architecture
 (Add diagram later)
