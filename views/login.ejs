@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login</title>
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1c1c1c;
+  background-image: radial-gradient(circle at top left, #2b2b2b, #111);
+}
+
+.card {
+  background: #2a2a2a;
+  border-radius: 18px;
+  padding: 55px 36px 40px 36px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 0 40px rgba(0, 0, 0, .6);
+  border: 1px solid #333;
+  position: relative;
+  overflow: hidden;
+}
+
+.traffic-lights {
+  position: absolute;
+  top: 18px;
+  left: 22px;
+  display: flex;
+  gap: 10px;
+}
+
+.light {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  opacity: 0.4;
+}
+
+.light.red { background: #ff2b2b; animation: pulseRed 3s infinite; }
+.light.yellow { background: #f1c40f; animation: pulseYellow 3s infinite; }
+.light.green { background: #00ff6a; animation: pulseGreen 3s infinite; }
+
+@keyframes pulseRed {
+  0%, 100% { opacity: 1; box-shadow: 0 0 20px #ff2b2b; }
+  33%, 66% { opacity: 0.3; box-shadow: 0 0 5px #ff2b2b; }
+}
+@keyframes pulseYellow {
+  0%, 33%, 100% { opacity: 0.3; box-shadow: 0 0 5px #f1c40f; }
+  40%, 60% { opacity: 1; box-shadow: 0 0 20px #f1c40f; }
+}
+@keyframes pulseGreen {
+  0%, 66%, 100% { opacity: 0.3; box-shadow: 0 0 5px #00ff6a; }
+  75%, 95% { opacity: 1; box-shadow: 0 0 20px #00ff6a; }
+}
+
+.card h1 {
+  font-size: 28px;
+  color: #fff;
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.card p.sub {
+  text-align: center;
+  color: #bbb;
+  margin-bottom: 28px;
+  font-size: 14px;
+}
+
+.form-group { margin-bottom: 18px; }
+
+label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #ccc;
+  margin-bottom: 6px;
+}
+
+input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid #444;
+  border-radius: 10px;
+  font-size: 15px;
+  background: #1f1f1f;
+  color: #fff;
+  outline: none;
+}
+
+input:focus {
+  border-color: #f1c40f;
+  box-shadow: 0 0 10px #f1c40f;
+}
+
+.btn {
+  width: 100%;
+  padding: 13px;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: .3s;
+}
+
+.btn-primary {
+  background: linear-gradient(to right, #ff0000, #f1c40f, #00c853);
+  color: #111;
+  margin-top: 6px;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+}
+
+.divider {
+  text-align: center;
+  margin: 20px 0;
+  color: #777;
+}
+
+.btn-google {
+  background: #111;
+  border: 1.5px solid #444;
+  color: #fff;
+}
+
+.btn-google:hover {
+  border-color: #00c853;
+}
+
+.bottom-link {
+  text-align: center;
+  margin-top: 20px;
+  color: #aaa;
+}
+
+.bottom-link a {
+  color: #f1c40f;
+  text-decoration: none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+  <div class="traffic-lights">
+    <div class="light red"></div>
+    <div class="light yellow"></div>
+    <div class="light green"></div>
+  </div>
+
+  <h1>Welcome Back</h1>
+  <p class="sub">Sign in to your account</p>
+
+  <!-- LOGIN FORM -->
+  <form action="/login" method="POST">
+
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" name="email" required>
+    </div>
+
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" name="password" required>
+    </div>
+
+    <button type="submit" class="btn btn-primary">LOGIN</button>
+
+  </form>
+
+  <div class="divider">OR</div>
+
+  <!-- GOOGLE LOGIN -->
+  <a href="/auth/google">
+    <button class="btn btn-google">Continue with Google</button>
+  </a>
+
+  <div class="bottom-link">
+    Don’t have an account? <a href="/register">Sign Up</a>
+  </div>
+
+</div>
+
+</body>
+</html>

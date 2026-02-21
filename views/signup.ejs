@@ -1,0 +1,188 @@
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #0a0a0a;
+    background-image: radial-gradient(circle at top left, #1f1f1f, #000);
+  }
+
+  .card {
+    background: #141414;
+    border-radius: 20px;
+    padding: 60px 36px 48px;
+    width: 100%;
+    max-width: 500px;
+    box-shadow: 0 0 60px rgba(0,0,0,.9);
+    border: 1px solid #222;
+    text-align: center;
+    position: relative;
+  }
+
+  /* ===== Traffic Light Dots ===== */
+
+  .traffic-lights {
+    position: absolute;
+    top: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 12px;
+  }
+
+  .light {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    opacity: .4;
+  }
+
+  .red { background: #ff2b2b; }
+  .yellow { background: #f1c40f; }
+  .green { background: #00ff6a; }
+
+  /* Animated Pulse */
+  @keyframes pulseRed {
+    0%, 100% { opacity: .3; box-shadow: none; }
+    20% { opacity: 1; box-shadow: 0 0 15px #ff2b2b; }
+  }
+
+  @keyframes pulseYellow {
+    0%, 100% { opacity: .3; box-shadow: none; }
+    50% { opacity: 1; box-shadow: 0 0 15px #f1c40f; }
+  }
+
+  @keyframes pulseGreen {
+    0%, 100% { opacity: .3; box-shadow: none; }
+    80% { opacity: 1; box-shadow: 0 0 15px #00ff6a; }
+  }
+
+  .red { animation: pulseRed 4s infinite; }
+  .yellow { animation: pulseYellow 4s infinite; }
+  .green { animation: pulseGreen 4s infinite; }
+
+  /* ===== Avatar ===== */
+
+  .avatar {
+    width: 95px;
+    height: 95px;
+    border-radius: 50%;
+    background: linear-gradient(to bottom, #ff0000, #f1c40f, #00ff6a);
+    color: #111;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    font-weight: 700;
+    margin: 0 auto 20px;
+    overflow: hidden;
+    box-shadow: 0 0 25px rgba(0,255,106,.3);
+  }
+
+  .avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  h1 {
+    font-size: 26px;
+    color: #ffffff;
+    margin-bottom: 6px;
+    letter-spacing: 1px;
+  }
+
+  .email {
+    color: #bbb;
+    font-size: 14px;
+    margin-bottom: 30px;
+  }
+
+  /* ===== Info Box ===== */
+
+  .info-box {
+    background: #0f0f0f;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 28px;
+    text-align: left;
+    border: 1px solid #222;
+  }
+
+  .info-box h3 {
+    font-size: 13px;
+    color: #f1c40f;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 14px;
+  }
+
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #1f1f1f;
+    font-size: 14px;
+  }
+
+  .info-row:last-child { border-bottom: none; }
+
+  .info-row span:first-child { color: #888; }
+  .info-row span:last-child {
+    color: #00ff6a;
+    font-weight: 600;
+  }
+
+  /* ===== Animated Signal Pulse Status ===== */
+
+  .system-status {
+    margin-bottom: 25px;
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #00ff6a;
+    position: relative;
+  }
+
+  .system-status::after {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin-left: 8px;
+    border-radius: 50%;
+    background: #00ff6a;
+    animation: pulseLive 1.2s infinite;
+  }
+
+  @keyframes pulseLive {
+    0% { box-shadow: 0 0 0 0 rgba(0,255,106,.7); }
+    70% { box-shadow: 0 0 0 10px rgba(0,255,106,0); }
+    100% { box-shadow: 0 0 0 0 rgba(0,255,106,0); }
+  }
+
+  /* ===== Logout Button ===== */
+
+  .btn-logout {
+    display: inline-block;
+    padding: 14px 40px;
+    background: linear-gradient(to right, #ff0000, #f1c40f, #00ff6a);
+    color: #111;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all .3s ease;
+  }
+
+  .btn-logout:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 25px rgba(255,0,0,.4);
+  }
+</style>
