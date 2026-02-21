@@ -10,6 +10,16 @@ Problem: Fixed-timer signals. Objectives: Adaptive control. Approach: Q-learning
 - Objective 2
 - Objective 3
 
+
+
+
+
+
+
+
+
+
+
 ## Tech Stack
 - Frontend:
 - Backend:
@@ -17,6 +27,23 @@ Problem: Fixed-timer signals. Objectives: Adaptive control. Approach: Q-learning
 - Tools:
 
 ## Folder Structure
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ```bash
 Capstone_project/
