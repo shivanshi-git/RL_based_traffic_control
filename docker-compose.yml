@@ -1,21 +1,21 @@
-version: "3.8"
-
 services:
   mongo:
     image: mongo
     container_name: traffic_mongo
     ports:
       - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
 
   backend:
     build: ./server
     container_name: traffic_backend
     ports:
       - "5000:5000"
-    environment:
-      - MONGODB_URI=mongodb://mongo:27017/mern-auth
     depends_on:
       - mongo
+    environment:
+      - MONGODB_URI=mongodb://mongo:27017/mern-auth
 
   frontend:
     build: ./frontend
@@ -24,3 +24,6 @@ services:
       - "3000:3000"
     depends_on:
       - backend
+
+volumes:
+  mongo_data:
