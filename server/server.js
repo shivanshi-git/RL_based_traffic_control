@@ -1,26 +1,38 @@
 import express from "express";
-import cors from "cors";
 import dotenv from "dotenv";
+import cors from "cors";
+import cookieParser from "cookie-parser";
 import connectDB from "./config/mongodb.js";
 import authRoutes from "./routes/authRoutes.js";
 
 dotenv.config();
 
 const app = express();
+const port = process.env.PORT || 5000;
 
-app.use(cors());
-app.use(express.json());
-
+// Connect Database
 connectDB();
 
-// ✅ AUTH ROUTES
-app.use("/api/auth", authRoutes);
+// Middleware
+app.use(express.json());
+app.use(cookieParser());
 
+app.use(
+  cors({
+    origin: "http://localhost:5173", // frontend URL
+    credentials: true,
+  })
+);
+
+// Test Route
 app.get("/", (req, res) => {
-  res.send("Server is running");
+  res.send("API Working");
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+// Auth Routes
+app.use("/api/auth", authRoutes);
+
+// Start Server
+app.listen(port, () => {
+  console.log(`Server started on PORT: ${port}`);
 });
