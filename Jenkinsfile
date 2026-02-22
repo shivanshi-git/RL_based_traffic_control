@@ -8,30 +8,24 @@ pipeline {
                 checkout scm
             }
         }
-
-        stage('Setup Environment') {
+        stage('Build Docker Images') {
             steps {
-                bat 'npm install'
+                bat 'docker compose build'
             }
         }
 
-        stage('Build & Deploy') {
+        stage('Deploy Containers') {
             steps {
-                bat 'docker-compose down || exit 0'
-                bat 'docker-compose up -d --build'
+                bat 'docker compose up -d'
             }
         }
 
-        stage('Health Check') {
-            steps {
-                bat 'ping 127.0.0.1 -n 11 > nul'
-                bat 'curl -f http://localhost:3000/health || exit 1'
-            }
-        }
+>>>>>>> e1222b537e0650065bda2bfe7038026e8f6cff11
     }
 
     post {
         success {
+<<<<<<< HEAD
             echo 'Pipeline completed successfully!'
         }
         failure {
@@ -39,3 +33,12 @@ pipeline {
         }
     }
 }
+=======
+            echo 'Deployment Successful 🚀'
+        }
+        failure {
+            echo 'Pipeline Failed ❌'
+        }
+    }
+}
+>>>>>>> e1222b537e0650065bda2bfe7038026e8f6cff11
