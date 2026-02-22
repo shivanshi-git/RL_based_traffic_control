@@ -93,9 +93,6 @@ export const register = async (req, res) => {
   }
 };
 
-// ============================================
-// VERIFY EMAIL
-// ============================================
 export const verifyEmail = async (req, res) => {
   try {
     const { token } = req.params;
