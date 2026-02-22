@@ -19,23 +19,24 @@ function Signup() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    try {
-      const res = await axios.post(
-        "http://localhost:5000/api/auth/register",
-        formData
-      );
+  try {
+    const res = await axios.post(
+      "http://localhost:5000/api/auth/register",
+      formData
+    );
 
-      alert(res.data.message);
+    alert(res.data.message);
 
-      if (res.data.success) {
-        navigate("/login");
-      }
-    } catch (error) {
-      alert("Error registering user");
+    if (res.data.success) {
+      navigate("/login");
     }
-  };
+  } catch (error) {
+    console.error(error);
+    alert("Error registering user");
+  }
+};
 
   return (
     <div className="container">

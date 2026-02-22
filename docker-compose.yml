@@ -15,7 +15,11 @@ services:
     depends_on:
       - mongo
     environment:
-      - MONGODB_URI=mongodb://mongo:27017/mern-auth
+      - MONGO_URI=mongodb://mongo:27017/Capstone
+      - JWT_SECRET=supersecretkey
+      - SMTP_USER=himadribahuguna8@gmail.com
+      - SMTP_PASS=yifjnhwkhnucctzm
+      - BASE_URL=http://localhost:5000
 
   frontend:
     build: ./frontend
