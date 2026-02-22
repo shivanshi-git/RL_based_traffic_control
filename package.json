@@ -1,25 +1,54 @@
 {
 
   "name": "capstone_project",
+
   "version": "1.0.0",
+
   "description": "Problem: Fixed-timer signals. Objectives: Adaptive control. Approach: Q-learning. Outcome: Reduced wait times. Tools: RL.",
+
   "main": "server.js",
-  "type" : "module",
+
   "scripts": {
+
     "start": "node server.js",
+
     "server": "nodemon server.js"
 
   },
+
   "keywords": [],
+
   "author": "",
+
   "license": "ISC",
 
   "dependencies": {
+
+    "bcryptjs": "^3.0.3",
+
+    "connect-mongo": "^6.0.0",
+
     "cors": "^2.8.6",
+
     "dotenv": "^17.3.1",
+
     "ejs": "^4.0.1",
+
     "express": "^5.2.1",
-    "mongoose": "^8.23.0"
+
+    "express-flash": "^0.0.2",
+
+    "express-session": "^1.19.0",
+
+    "mongoose": "^8.23.0",
+
+    "passport": "^0.7.0",
+
+    "passport-google-oauth20": "^2.0.0",
+
+    "passport-local": "^1.0.0"
 
   }
+
 }
+

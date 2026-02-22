@@ -57,5 +57,3 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/loginpage
   });
 
 module.exports = app;
-const passport = require("passport");
-const GoogleStrategy = require("passport-google-oauth20").Strategy;
