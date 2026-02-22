@@ -8,7 +8,6 @@ pipeline {
                 checkout scm
             }
         }
-
         stage('Build Docker Images') {
             steps {
                 bat 'docker compose build'
@@ -21,10 +20,20 @@ pipeline {
             }
         }
 
+>>>>>>> e1222b537e0650065bda2bfe7038026e8f6cff11
     }
 
     post {
         success {
+<<<<<<< HEAD
+            echo 'Pipeline completed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed!'
+        }
+    }
+}
+=======
             echo 'Deployment Successful 🚀'
         }
         failure {
@@ -32,3 +41,4 @@ pipeline {
         }
     }
 }
+>>>>>>> e1222b537e0650065bda2bfe7038026e8f6cff11
