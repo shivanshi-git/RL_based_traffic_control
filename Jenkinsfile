@@ -9,21 +9,27 @@ pipeline {
             }
         }
 
+        stage('Set Docker Context') {
+            steps {
+                bat 'docker context use desktop-linux'
+            }
+        }
+
         stage('Stop Old Containers') {
             steps {
-                bat 'docker compose down'
+                bat 'docker compose -p capstone_project down --remove-orphans'
             }
         }
 
         stage('Build Docker Images') {
             steps {
-                bat 'docker compose build'
+                bat 'docker compose -p capstone_project build'
             }
         }
 
         stage('Deploy Containers') {
             steps {
-                bat 'docker compose up -d'
+                bat 'docker compose -p capstone_project up -d --remove-orphans'
             }
         }
 
