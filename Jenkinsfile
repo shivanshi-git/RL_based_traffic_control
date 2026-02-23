@@ -9,21 +9,10 @@ pipeline {
             }
         }
 
-        stage('Stop Old Containers') {
+        stage('Deploy Application') {
             steps {
-                bat 'docker compose down --remove-orphans'
-            }
-        }
-
-        stage('Build Docker Images') {
-            steps {
-                bat 'docker compose build'
-            }
-        }
-
-        stage('Deploy Containers') {
-            steps {
-                bat 'docker compose up -d --remove-orphans'
+                bat 'docker compose down -v --remove-orphans || exit 0'
+                bat 'docker compose up -d --build --remove-orphans'
             }
         }
     }
@@ -37,9 +26,6 @@ pipeline {
         }
     }
 }
-
-
-
 
 
 
