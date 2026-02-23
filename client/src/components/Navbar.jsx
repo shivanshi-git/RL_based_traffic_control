@@ -1,30 +1,53 @@
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom";
+import API from "../api/axios";
 
 const Navbar = () => {
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await API.post("/auth/logout");
+      alert("Logged out");
+      navigate("/login");
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
-    <div className="flex justify-between items-center px-10 py-6">
+    <div className="flex justify-between items-center px-10 py-6 bg-white shadow-sm">
 
       {/* Logo */}
       <div className="flex items-center gap-2">
-        <div className="flex gap-1">
-          <div className="w-5 h-2 bg-blue-600 rounded"></div>
-          <div className="w-5 h-2 bg-blue-600 rounded"></div>
-          <div className="w-5 h-2 bg-blue-600 rounded"></div>
-        </div>
         <span className="text-xl font-semibold text-gray-700">
-          auth
+          Auth App
         </span>
       </div>
 
-      {/* Login Button */}
-      <Link to="/login">
-        <button className="border border-gray-300 px-6 py-2 rounded-full text-gray-700 hover:bg-gray-100 transition">
-          Login →
+      {/* Buttons */}
+      <div className="flex gap-4">
+        <Link to="/login">
+          <button className="bg-red-500 text-white px-6 py-2 rounded-full hover:bg-red-600 transition">
+            Login
+          </button>
+        </Link>
+
+        <Link to="/register">
+          <button className="bg-red-500 text-white px-6 py-2 rounded-full hover:bg-red-600 transition">
+            Register
+          </button>
+        </Link>
+
+        <button
+          onClick={handleLogout}
+          className="bg-red-500 text-white px-6 py-2 rounded-full hover:bg-red-600 transition"
+        >
+          Logout
         </button>
-      </Link>
+      </div>
 
     </div>
-  )
-}
+  );
+};
 
-export default Navbar
+export default Navbar;

@@ -62,6 +62,15 @@ const Login = () => {
         <button className="w-full py-3 rounded-full text-white font-medium bg-gradient-to-r from-purple-500 to-indigo-500 hover:opacity-90 transition">
           Sign Up
         </button>
+         
+         {/* Bottom Text */}
+        <p className="text-center text-sm text-gray-400 mt-6">
+          Don't have an account?{" "}
+          <Link to="/register" className= "text-purple-400 hover:underline">
+            Register here
+          </Link>
+        </p>
+        
 
         {/* Bottom Text */}
         <p className="text-center text-sm text-gray-400 mt-6">
@@ -75,5 +84,8 @@ const Login = () => {
     </div>
   )
 }
+
+
+
 
 export default Login
