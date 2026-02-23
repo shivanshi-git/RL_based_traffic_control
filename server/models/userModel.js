@@ -6,14 +6,14 @@ const userSchema = new mongoose.Schema(
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
 
-    // Email verification
-    verifyToken: { type: String, default: null },
-    verifyTokenExpireAt: { type: Number, default: 0 },
+    // ================= EMAIL VERIFICATION (OTP) =================
     isVerified: { type: Boolean, default: false },
+    verificationOtp: { type: String, default: null },
+    verificationOtpExpireAt: { type: Date, default: null },
 
-    // Password reset
-    resetToken: { type: String, default: null },
-    resetTokenExpire: { type: Number, default: 0 },
+    // ================= RESET PASSWORD (OTP) =================
+    resetPasswordOtp: { type: String, default: null },
+    resetPasswordOtpExpireAt: { type: Date, default: null },
   },
   { timestamps: true }
 );

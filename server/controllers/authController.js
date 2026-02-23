@@ -40,54 +40,38 @@ export const register = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const rawVerifyToken = crypto.randomBytes(32).toString("hex");
-    const hashedVerifyToken = crypto
+    // Generate OTP
+    const otp = crypto.randomInt(100000, 999999).toString();
+
+    const hashedOtp = crypto
       .createHash("sha256")
-      .update(rawVerifyToken)
+      .update(otp)
       .digest("hex");
 
     const user = await User.create({
       name,
       email,
       password: hashedPassword,
-      verifyToken: hashedVerifyToken,
-      verifyTokenExpireAt: Date.now() + 24 * 60 * 60 * 1000,
-      isVerified: false, // change to true if you want auto verify
+      verificationOtp: hashedOtp,
+      verificationOtpExpireAt: Date.now() + 10 * 60 * 1000,
+      isVerified: false,
     });
 
-    const token = generateToken(user._id);
-
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+    await transporter.sendMail({
+      from: `"Your App" <${process.env.SMTP_USER}>`,
+      to: email,
+      subject: "Verify Your Email",
+      html: `
+        <h2>Hello ${name}</h2>
+        <p>Your verification OTP is:</p>
+        <h1>${otp}</h1>
+        <p>This OTP expires in 10 minutes.</p>
+      `,
     });
-
-    // EMAIL SENDING
-    const verificationLink = `${process.env.BASE_URL}/api/auth/verify/${rawVerifyToken}`;
-
-    try {
-      await transporter.sendMail({
-        from: `"Your App" <${process.env.SMTP_USER}>`,
-        to: email,
-        subject: "Verify Your Email",
-        html: `
-          <h2>Hello ${name}</h2>
-          <p>Click below to verify your email:</p>
-          <a href="${verificationLink}">Verify Email</a>
-        `,
-      });
-
-      console.log("Verification email sent successfully");
-    } catch (emailError) {
-      console.log("EMAIL ERROR:");
-      console.log(emailError.message);
-    }
 
     return res.status(201).json({
       success: true,
-      message: "Registered successfully",
+      message: "Registered successfully. Please verify your email using OTP.",
     });
 
   } catch (error) {
@@ -95,48 +79,6 @@ export const register = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Server error during registration",
-    });
-  }
-};
-
-// ================= VERIFY EMAIL =================
-export const verifyEmail = async (req, res) => {
-  try {
-    const { token } = req.params;
-
-    const hashedToken = crypto
-      .createHash("sha256")
-      .update(token)
-      .digest("hex");
-
-    const user = await User.findOne({
-      verifyToken: hashedToken,
-      verifyTokenExpireAt: { $gt: Date.now() },
-    });
-
-    if (!user) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid or expired token",
-      });
-    }
-
-    user.isVerified = true;
-    user.verifyToken = undefined;
-    user.verifyTokenExpireAt = undefined;
-
-    await user.save();
-
-    return res.json({
-      success: true,
-      message: "Email verified successfully",
-    });
-
-  } catch (error) {
-    console.log("VERIFY ERROR:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Server error",
     });
   }
 };
@@ -155,6 +97,13 @@ export const login = async (req, res) => {
       });
     }
 
+    if (!user.isVerified) {
+      return res.status(403).json({
+        success: false,
+        message: "Please verify your email first",
+      });
+    }
+
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
@@ -164,20 +113,12 @@ export const login = async (req, res) => {
       });
     }
 
-    // 🔥 TEMPORARY FIX FOR DEMO
-    // Remove this block if you want strict verification
-    if (!user.isVerified) {
-      console.log("User not verified — auto verifying for now");
-      user.isVerified = true;
-      await user.save();
-    }
-
     const token = generateToken(user._id);
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      secure: false,
+      sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -201,12 +142,209 @@ export const logout = async (req, res) => {
   return res.json({ success: true, message: "Logged out successfully" });
 };
 
+// ================= SEND VERIFICATION OTP =================
+export const sendVerificationOtp = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    if (user.isVerified) {
+      return res.json({
+        success: false,
+        message: "User already verified",
+      });
+    }
+
+    const otp = crypto.randomInt(100000, 999999).toString();
+
+    const hashedOtp = crypto
+      .createHash("sha256")
+      .update(otp)
+      .digest("hex");
+
+    user.verificationOtp = hashedOtp;
+    user.verificationOtpExpireAt = Date.now() + 10 * 60 * 1000;
+
+    await user.save();
+
+    await transporter.sendMail({
+      from: `"Your App" <${process.env.SMTP_USER}>`,
+      to: email,
+      subject: "Email Verification OTP",
+      html: `
+        <h2>Your OTP is: ${otp}</h2>
+        <p>This OTP is valid for 10 minutes.</p>
+      `,
+    });
+
+    return res.json({
+      success: true,
+      message: "Verification OTP sent to email",
+    });
+
+  } catch (error) {
+    console.log("SEND OTP ERROR:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
+// ================= VERIFY EMAIL OTP =================
+export const verifyEmailOtp = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    const user = await User.findOne({ email });
+
+    if (!user || !user.verificationOtp) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid request",
+      });
+    }
+
+    const hashedOtp = crypto
+      .createHash("sha256")
+      .update(otp)
+      .digest("hex");
+
+    if (
+      user.verificationOtp !== hashedOtp ||
+      user.verificationOtpExpireAt < Date.now()
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or expired OTP",
+      });
+    }
+
+    user.isVerified = true;
+    user.verificationOtp = undefined;
+    user.verificationOtpExpireAt = undefined;
+
+    await user.save();
+
+    return res.json({
+      success: true,
+      message: "Email verified successfully",
+    });
+
+  } catch (error) {
+    console.log("VERIFY OTP ERROR:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
 // ================= FORGOT PASSWORD =================
 export const forgotPassword = async (req, res) => {
-  return res.json({ success: true, message: "Feature coming soon" });
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const otp = crypto.randomInt(100000, 999999).toString();
+
+    const hashedOtp = crypto
+      .createHash("sha256")
+      .update(otp)
+      .digest("hex");
+
+    user.resetPasswordOtp = hashedOtp;
+    user.resetPasswordOtpExpireAt = Date.now() + 10 * 60 * 1000;
+
+    await user.save();
+
+    await transporter.sendMail({
+      from: `"Your App" <${process.env.SMTP_USER}>`,
+      to: email,
+      subject: "Reset Password OTP",
+      html: `
+        <h2>Your Password Reset OTP: ${otp}</h2>
+        <p>This OTP is valid for 10 minutes.</p>
+      `,
+    });
+
+    return res.json({
+      success: true,
+      message: "Reset OTP sent to email",
+    });
+
+  } catch (error) {
+    console.log("FORGOT ERROR:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
 };
 
 // ================= RESET PASSWORD =================
 export const resetPassword = async (req, res) => {
-  return res.json({ success: true, message: "Feature coming soon" });
+  try {
+    const { email, otp, newPassword } = req.body;
+
+    const user = await User.findOne({ email });
+
+    if (!user || !user.resetPasswordOtp) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid request",
+      });
+    }
+
+    const hashedOtp = crypto
+      .createHash("sha256")
+      .update(otp)
+      .digest("hex");
+
+    if (
+      user.resetPasswordOtp !== hashedOtp ||
+      user.resetPasswordOtpExpireAt < Date.now()
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or expired OTP",
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    user.password = hashedPassword;
+    user.resetPasswordOtp = undefined;
+    user.resetPasswordOtpExpireAt = undefined;
+
+    await user.save();
+
+    return res.json({
+      success: true,
+      message: "Password reset successful",
+    });
+
+  } catch (error) {
+    console.log("RESET ERROR:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
 };
