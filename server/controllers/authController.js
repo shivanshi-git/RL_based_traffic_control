@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import transporter from "../config/nodemailer.js";
 
+
 // ================= JWT =================
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -203,10 +204,207 @@ export const logout = async (req, res) => {
 
 // ================= FORGOT PASSWORD =================
 export const forgotPassword = async (req, res) => {
-  return res.json({ success: true, message: "Feature coming soon" });
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const otp = crypto.randomInt(100000, 999999).toString();
+
+    const hashedOtp = crypto
+      .createHash("sha256")
+      .update(otp)
+      .digest("hex");
+
+    user.resetPasswordOtp = hashedOtp;
+    user.resetPasswordOtpExpireAt = Date.now() + 10 * 60 * 1000;
+
+    await user.save();
+
+    await transporter.sendMail({
+      from: `"Your App" <${process.env.SMTP_USER}>`,
+      to: email,
+      subject: "Reset Password OTP",
+      html: `<h2>Your Password Reset OTP: ${otp}</h2>
+             <p>This OTP is valid for 10 minutes.</p>`,
+    });
+
+    return res.json({
+      success: true,
+      message: "Reset OTP sent to email",
+    });
+
+  } catch (error) {
+    console.log("FORGOT ERROR:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
 };
 
 // ================= RESET PASSWORD =================
 export const resetPassword = async (req, res) => {
-  return res.json({ success: true, message: "Feature coming soon" });
+  try {
+    const { email, otp, newPassword } = req.body;
+
+    const user = await User.findOne({ email });
+
+    if (!user || !user.resetPasswordOtp) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid request",
+      });
+    }
+
+    const hashedOtp = crypto
+      .createHash("sha256")
+      .update(otp)
+      .digest("hex");
+
+    if (
+      user.resetPasswordOtp !== hashedOtp ||
+      user.resetPasswordOtpExpireAt < Date.now()
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or expired OTP",
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    user.password = hashedPassword;
+    user.resetPasswordOtp = undefined;
+    user.resetPasswordOtpExpireAt = undefined;
+
+    await user.save();
+
+    return res.json({
+      success: true,
+      message: "Password reset successful",
+    });
+
+  } catch (error) {
+    console.log("RESET ERROR:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
 };
+
+
+// ================= SEND VERIFICATION OTP =================
+export const sendVerificationOtp = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    if (user.isVerified) {
+      return res.json({
+        success: false,
+        message: "User already verified",
+      });
+    }
+
+    // Generate 6 digit OTP
+    const otp = crypto.randomInt(100000, 999999).toString();
+
+    const hashedOtp = crypto
+      .createHash("sha256")
+      .update(otp)
+      .digest("hex");
+
+    user.verificationOtp = hashedOtp;
+    user.verificationOtpExpireAt = Date.now() + 10 * 60 * 1000; // 10 minutes
+
+    await user.save();
+
+    await transporter.sendMail({
+      from: `"Your App" <${process.env.SMTP_USER}>`,
+      to: email,
+      subject: "Email Verification OTP",
+      html: `<h2>Your OTP is: ${otp}</h2>
+             <p>This OTP is valid for 10 minutes.</p>`,
+    });
+
+    return res.json({
+      success: true,
+      message: "Verification OTP sent to email",
+    });
+
+  } catch (error) {
+    console.log("SEND OTP ERROR:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
+
+// ================= VERIFY EMAIL OTP =================
+export const verifyEmailOtp = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    const user = await User.findOne({ email });
+
+    if (!user || !user.verificationOtp) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid request",
+      });
+    }
+
+    const hashedOtp = crypto
+      .createHash("sha256")
+      .update(otp)
+      .digest("hex");
+
+    if (
+      user.verificationOtp !== hashedOtp ||
+      user.verificationOtpExpireAt < Date.now()
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or expired OTP",
+      });
+    }
+
+    user.isVerified = true;
+    user.verificationOtp = undefined;
+    user.verificationOtpExpireAt = undefined;
+
+    await user.save();
+
+    return res.json({
+      success: true,
+      message: "Email verified successfully",
+    });
+
+  } catch (error) {
+    console.log("VERIFY OTP ERROR:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
