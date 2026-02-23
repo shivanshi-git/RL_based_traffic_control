@@ -20,7 +20,7 @@ const Navbar = () => {
       {/* Logo */}
       <div className="flex items-center gap-2">
         <span className="text-xl font-semibold text-gray-700">
-          Auth App
+          RL BASED SMART TRAFFIC SIGNAL CONTROL
         </span>
       </div>
 

@@ -23,8 +23,7 @@ const Header = () => {
 
       {/* Subtext */}
       <p className="text-gray-500 max-w-xl mb-8">
-        Let’s start with a quick product tour and we will have you up and
-        running in no time!
+        Smart Traffic Management System
       </p>
 
       {/* Button */}
