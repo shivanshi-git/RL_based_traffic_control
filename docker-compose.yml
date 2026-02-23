@@ -18,16 +18,26 @@ services:
       - MONGO_URI=mongodb://mongo:27017/Capstone
       - JWT_SECRET=supersecretkey
       - SMTP_USER=himadribahuguna8@gmail.com
-      - SMTP_PASS=yifjnhwkhnucctzm
+      - SMTP_PASS=baiabpxmrvrrmxtx
       - BASE_URL=http://localhost:5000
 
   frontend:
-    build: ./frontend
+    build: ./client
     container_name: traffic_frontend
     ports:
-      - "3000:3000"
+      - "5173:5173"
     depends_on:
       - backend
 
 volumes:
   mongo_data:
+
+
+
+
+
+
+
+
+
+  
