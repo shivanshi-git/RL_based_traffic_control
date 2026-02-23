@@ -21,7 +21,7 @@ const Register = () => {
       });
 
       alert(res.data.message);
-      navigate("/login");
+      navigate("/verify-email");
 
     } catch (error) {
       alert(error.response?.data?.message || "Registration failed");

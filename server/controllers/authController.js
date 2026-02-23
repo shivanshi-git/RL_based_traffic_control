@@ -12,7 +12,92 @@ const generateToken = (id) => {
   });
 };
 
-// ================= REGISTER =================
+
+// // register controllerrrrrr
+// export const register = async (req, res) => {
+//   try {
+//     const { name, email, password } = req.body;
+
+//     if (!name || !email || !password) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "All fields are required",
+//       });
+//     }
+
+//     if (password.length < 6) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Password must be at least 6 characters",
+//       });
+//     }
+
+//     const existingUser = await User.findOne({ email });
+//     if (existingUser) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "User already exists",
+//       });
+//     }
+
+//     const hashedPassword = await bcrypt.hash(password, 10);
+
+//     // Generate raw token (send this in email)
+//     const rawVerifyToken = crypto.randomBytes(32).toString("hex");
+
+//     // Hash token (store in DB)
+//     const hashedVerifyToken = crypto
+//       .createHash("sha256")
+//       .update(rawVerifyToken)
+//       .digest("hex");
+
+//     const user = await User.create({
+//       name,
+//       email,
+//       password: hashedPassword,
+//       verifyToken: hashedVerifyToken,
+//       verifyTokenExpireAt: Date.now() + 24 * 60 * 60 * 1000,
+//       isVerified: false,
+//     });
+
+//     // Generate JWT
+//     const token = generateToken(user._id);
+
+//     res.cookie("token", token, {
+//       httpOnly: true,
+//       secure: false, // keep false in development
+//       sameSite: "lax",
+//       maxAge: 7 * 24 * 60 * 60 * 1000,
+//     });
+
+//     // 🔥 IMPORTANT: Send frontend link (5173)
+//     const verificationLink = `http://localhost:5173/email-verify/${rawVerifyToken}`;
+
+//     await transporter.sendMail({
+//       from: process.env.SMTP_USER,
+//       to: email,
+//       subject: "Verify Your Email",
+//       html: `
+//         <h2>Hello ${name}</h2>
+//         <p>Click below to verify your email:</p>
+//         <a href="${verificationLink}">${verificationLink}</a>
+//       `,
+//     });
+
+//     return res.status(201).json({
+//       success: true,
+//       message: "Registered successfully. Please verify your email.",
+//     });
+
+//   } catch (error) {
+//     console.log("REGISTER ERROR:", error);
+//     return res.status(500).json({
+//       success: false,
+//       message: "Server error during registration",
+//     });
+//   }
+// };
+
 export const register = async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -41,54 +126,38 @@ export const register = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const rawVerifyToken = crypto.randomBytes(32).toString("hex");
-    const hashedVerifyToken = crypto
+    // 🔥 Generate OTP
+    const otp = crypto.randomInt(100000, 999999).toString();
+
+    const hashedOtp = crypto
       .createHash("sha256")
-      .update(rawVerifyToken)
+      .update(otp)
       .digest("hex");
 
     const user = await User.create({
       name,
       email,
       password: hashedPassword,
-      verifyToken: hashedVerifyToken,
-      verifyTokenExpireAt: Date.now() + 24 * 60 * 60 * 1000,
-      isVerified: false, // change to true if you want auto verify
+      verificationOtp: hashedOtp,
+      verificationOtpExpireAt: Date.now() + 10 * 60 * 1000,
+      isVerified: false,
     });
 
-    const token = generateToken(user._id);
-
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+    await transporter.sendMail({
+      from: `"Your App" <${process.env.SMTP_USER}>`,
+      to: email,
+      subject: "Verify Your Email",
+      html: `
+        <h2>Hello ${name}</h2>
+        <p>Your verification OTP is:</p>
+        <h1>${otp}</h1>
+        <p>This OTP expires in 10 minutes.</p>
+      `,
     });
-
-    // EMAIL SENDING
-    const verificationLink = `${process.env.BASE_URL}/api/auth/verify/${rawVerifyToken}`;
-
-    try {
-      await transporter.sendMail({
-        from: `"Your App" <${process.env.SMTP_USER}>`,
-        to: email,
-        subject: "Verify Your Email",
-        html: `
-          <h2>Hello ${name}</h2>
-          <p>Click below to verify your email:</p>
-          <a href="${verificationLink}">Verify Email</a>
-        `,
-      });
-
-      console.log("Verification email sent successfully");
-    } catch (emailError) {
-      console.log("EMAIL ERROR:");
-      console.log(emailError.message);
-    }
 
     return res.status(201).json({
       success: true,
-      message: "Registered successfully",
+      message: "Registered successfully. Please verify your email using OTP.",
     });
 
   } catch (error) {
@@ -99,6 +168,49 @@ export const register = async (req, res) => {
     });
   }
 };
+
+// export const verifyEmail = async (req, res) => {
+//   try {
+//     const { token } = req.params;
+
+//     const hashedToken = crypto
+//       .createHash("sha256")
+//       .update(token)
+//       .digest("hex");
+
+//     const user = await User.findOne({
+//       verifyToken: hashedToken,
+//       verifyTokenExpireAt: { $gt: Date.now() },
+//     });
+
+//     if (!user) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Invalid or expired token",
+//       });
+//     }
+
+//     user.isVerified = true;
+//     user.verifyToken = undefined;
+//     user.verifyTokenExpireAt = undefined;
+
+//     await user.save();
+
+//     return res.json({
+//       success: true,
+//       message: "Email verified successfully",
+//     });
+
+//   } catch (error) {
+//     console.log("VERIFY ERROR:", error);
+//     return res.status(500).json({
+//       success: false,
+//       message: "Server error",
+//     });
+//   }
+// };
+
+//verify email
 
 
 export const verifyEmail = async (req, res) => {
@@ -128,7 +240,7 @@ export const verifyEmail = async (req, res) => {
 
     await user.save();
 
-    return res.json({
+    return res.status(200).json({
       success: true,
       message: "Email verified successfully",
     });
@@ -142,7 +254,8 @@ export const verifyEmail = async (req, res) => {
   }
 };
 
-// ================= LOGIN =================
+//LOGINNN
+
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -156,6 +269,13 @@ export const login = async (req, res) => {
       });
     }
 
+    if (!user.isVerified) {
+      return res.status(403).json({
+        success: false,
+        message: "Please verify your email first",
+      });
+    }
+
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
@@ -165,20 +285,12 @@ export const login = async (req, res) => {
       });
     }
 
-    // 🔥 TEMPORARY FIX FOR DEMO
-    // Remove this block if you want strict verification
-    if (!user.isVerified) {
-      console.log("User not verified — auto verifying for now");
-      user.isVerified = true;
-      await user.save();
-    }
-
     const token = generateToken(user._id);
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      secure: false, // keep false in development
+      sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
