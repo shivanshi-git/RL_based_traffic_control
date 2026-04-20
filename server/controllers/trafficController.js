@@ -1,57 +1,21 @@
-const axios = require("axios");
 const Traffic = require("../models/Traffic");
 
-let current = 0;
-
-// ================= RL SIGNAL =================
-exports.getRLSignal = async (req, res) => {
+// ================= RECEIVE DATA FROM PYTHON =================
+exports.logTraffic = async (req, res) => {
   try {
-    const { state } = req.body;
+    const { state, action, reward, type } = req.body;
 
-    // Call Python RL service
-    const response = await axios.post("http://localhost:8000/get_signal", {
-      state
-    });
-
-    const signal = response.data.signal;
-    const action = signal === "NS_GREEN" ? 0 : 1;
-
-    // Save to DB
     await Traffic.create({
       state,
       action,
-      reward: -state.reduce((a, b) => a + b, 0),
-      type: "RL"
+      reward,
+      type
     });
 
-    res.json({ signal });
+    res.json({ message: "Traffic data stored successfully" });
   } catch (err) {
-    console.error("RL ERROR:", err.message);
-    res.status(500).json({ error: "RL service error" });
-  }
-};
-
-// ================= FIXED TIMER =================
-exports.getFixedSignal = async (req, res) => {
-  try {
-    const { state } = req.body;
-
-    current = 1 - current;
-
-    const signal = current === 0 ? "NS_GREEN" : "EW_GREEN";
-
-    // Save to DB
-    await Traffic.create({
-      state,
-      action: current,
-      reward: -state.reduce((a, b) => a + b, 0),
-      type: "FIXED"
-    });
-
-    res.json({ signal });
-  } catch (err) {
-    console.error("FIXED ERROR:", err.message);
-    res.status(500).json({ error: "Fixed signal error" });
+    console.error("LOG ERROR:", err.message);
+    res.status(500).json({ error: "Failed to store data" });
   }
 };
 
