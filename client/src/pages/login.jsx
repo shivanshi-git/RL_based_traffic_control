@@ -20,8 +20,8 @@ const Login = () => {
 
       alert(res.data.message || "Login successful");
 
-      // 🔥 Redirect after login
-      navigate("/welcome");
+      // 🔥 Redirect after login → setup flow
+      navigate("/setup-automation");
 
     } catch (error) {
       alert(error.response?.data?.message || "Login failed");
