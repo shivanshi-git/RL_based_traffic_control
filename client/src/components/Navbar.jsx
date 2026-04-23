@@ -26,11 +26,6 @@ const Navbar = () => {
 
       {/* Buttons */}
       <div className="flex gap-4">
-        <Link to="/simulation">
-          <button className="bg-blue-500 text-white px-6 py-2 rounded-full hover:bg-blue-600 transition">
-            RL Simulation
-          </button>
-        </Link>
         <Link to="/login">
           <button className="bg-red-500 text-white px-6 py-2 rounded-full hover:bg-red-600 transition">
             Login
