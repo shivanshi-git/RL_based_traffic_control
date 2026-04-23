@@ -24,7 +24,7 @@ const SetupAutomation = () => {
       greenTime,
     };
     localStorage.setItem("automationConfig", JSON.stringify(config));
-    navigate("/setup-queue");
+    navigate("/simulation");
   };
 
   return (
@@ -298,13 +298,13 @@ const SetupAutomation = () => {
           padding: '2rem'
         }}>
           <svg viewBox="0 0 400 400" style={{ width: '100%', maxWidth: '450px', borderRadius: '24px', boxShadow: '0 0 50px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.05)', background: '#09090b' }}>
-            <rect width="400" height="400" fill="#09090b" />
+            <rect width="400" height="400" fill="#ffffff" />
             {/* NS Road */}
             <rect x="170" y="0" width="60" height="400" fill="#111116" />
-            <line x1="200" y1="0" x2="200" y2="400" stroke="#22222a" strokeWidth="2" strokeDasharray="12,12" />
+            <line x1="200" y1="0" x2="200" y2="400" stroke="#ffffff" strokeWidth="2" strokeDasharray="12,12" />
             {/* EW Road */}
             <rect x="0" y="170" width="400" height="60" fill="#111116" />
-            <line x1="0" y1="200" x2="400" y2="200" stroke="#22222a" strokeWidth="2" strokeDasharray="12,12" />
+            <line x1="0" y1="200" x2="400" y2="200" stroke="#ffffff" strokeWidth="2" strokeDasharray="12,12" />
             {/* Intersection */}
             <rect x="170" y="170" width="60" height="60" fill="#16161d" />
             {/* Lights */}
@@ -333,7 +333,7 @@ const SetupAutomation = () => {
             onClick={handleNext}
             style={{ marginTop: '2rem', flex: 'none', padding: '1rem 3rem', fontSize: '1rem', letterSpacing: '2px' }}
           >
-            PROCEED TO QUEUE SETUP →
+            LAUNCH SIMULATION ENGINE →
           </button>
         </div>
       </div>

@@ -8,13 +8,12 @@ import Navbar from "./components/Navbar";
 import Welcome from "./pages/Welcome";
 import TrafficSimulation from "./pages/TrafficSimulation";
 import SetupAutomation from "./pages/SetupAutomation";
-import SetupQueue from "./pages/SetupQueue";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 // Wrapper that conditionally shows the Navbar
 const AppLayout = () => {
   const location = useLocation();
-  const hideNavbarPaths = ["/setup-automation", "/setup-queue", "/simulation"];
+  const hideNavbarPaths = ["/setup-automation", "/simulation"];
   const showNavbar = !hideNavbarPaths.includes(location.pathname);
 
   return (
@@ -29,7 +28,6 @@ const AppLayout = () => {
         <Route path='/reset-password' element={<ResetPassword />} />
         <Route path="/welcome" element={<Welcome />} />
         <Route path="/setup-automation" element={<ProtectedRoute><SetupAutomation /></ProtectedRoute>} />
-        <Route path="/setup-queue" element={<ProtectedRoute><SetupQueue /></ProtectedRoute>} />
         <Route path="/simulation" element={<ProtectedRoute><TrafficSimulation /></ProtectedRoute>} />
       </Routes>
     </>

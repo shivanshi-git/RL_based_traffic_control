@@ -1,100 +1,96 @@
-import json
-import random
+import gymnasium as gym
+from gymnasium import spaces
 import numpy as np
+import random
+from stable_baselines3 import DQN, PPO
 
-class TrafficEnv:
+class TrafficEnv(gym.Env):
+    """
+    Custom Environment that follows gymnasium interface.
+    This environment simulates a 4-way intersection.
+    """
     def __init__(self):
-        # State: [NS_queue_size (max 10), EW_queue_size (max 10), current_light (0=NS, 1=EW)]
-        self.state_space = (11, 11, 2)
-        self.action_space = 2 # 0: Keep light green, 1: Switch light
-        self.reset()
+        super(TrafficEnv, self).__init__()
+        # Actions: 0 = Keep current light, 1 = Switch light
+        self.action_space = spaces.Discrete(2)
         
-    def reset(self):
+        # State: [NS_queue, EW_queue, current_light, time_in_phase]
+        # Normalized between 0 and 1
+        self.observation_space = spaces.Box(low=0, high=1, shape=(4,), dtype=np.float32)
+        
+        self.max_queue = 20
+        self.reset()
+
+    def reset(self, seed=None, options=None):
+        super().reset(seed=seed)
         self.ns_queue = 0
         self.ew_queue = 0
-        self.light = 0 # 0 for NS green, 1 for EW green
-        return self._get_state()
+        self.light = 0 # 0: NS, 1: EW
+        self.time_in_phase = 0
         
-    def _get_state(self):
-        return (min(self.ns_queue, 10), min(self.ew_queue, 10), self.light)
-        
+        return self._get_obs(), {}
+
+    def _get_obs(self):
+        return np.array([
+            self.ns_queue / self.max_queue,
+            self.ew_queue / self.max_queue,
+            float(self.light),
+            min(self.time_in_phase / 10.0, 1.0)
+        ], dtype=np.float32)
+
     def step(self, action):
-        # 1. Spawning vehicles (simulating ~0.4 cars arrive per step on each road)
-        # Using simple random equivalent of Poisson
-        if random.random() < 0.4: self.ns_queue += 1
-        if random.random() < 0.4: self.ew_queue += 1
-            
-        # 2. Agent Action: Light switch
+        self.time_in_phase += 1
+        
+        # Apply Action
+        switched = False
         if action == 1:
             self.light = 1 - self.light
+            self.time_in_phase = 0
+            switched = True
             
-        # 3. Traffic clearing
-        cleared_ns, cleared_ew = 0, 0
+        # Simulate Traffic Flow
+        # Arrival
+        if random.random() < 0.4: self.ns_queue = min(self.ns_queue + 1, self.max_queue)
+        if random.random() < 0.4: self.ew_queue = min(self.ew_queue + 1, self.max_queue)
+        
+        # Departure
+        cleared = 0
         if self.light == 0 and self.ns_queue > 0:
             self.ns_queue -= 1
-            cleared_ns = 1
+            cleared = 1
         elif self.light == 1 and self.ew_queue > 0:
             self.ew_queue -= 1
-            cleared_ew = 1
+            cleared = 1
             
-        # 4. Calculate Reward (Negative reward for waiting queues)
+        # Reward Function
+        # Penalize long queues
         reward = -(self.ns_queue + self.ew_queue)
+        # Bonus for clearing traffic
+        reward += cleared * 5.0
+        # Penalty for switching to avoid flickering
+        if switched:
+            reward -= 2.0
+            
+        terminated = False
+        truncated = False # We handle episode length in training loop or via wrapper
         
-        return self._get_state(), reward, (cleared_ns + cleared_ew)
+        return self._get_obs(), reward, terminated, truncated, {"cleared": cleared}
 
-def train_agent():
-    print("Initializing RL Agent Training...")
+def train_model(algo="DQN", total_timesteps=10000):
     env = TrafficEnv()
     
-    # Q-Table initialization (11 x 11 x 2 States) x 2 Actions
-    q_table = np.zeros(env.state_space + (env.action_space,))
-    
-    alpha, gamma, epsilon = 0.1, 0.95, 1.0
-    epsilon_decay, min_epsilon = 0.995, 0.01
-    episodes, steps_per_episode = 2000, 60
-    
-    history = []
-    
-    for ep in range(episodes):
-        state = env.reset()
-        total_reward = 0
-        throughput = 0
+    if algo == "DQN":
+        model = DQN("MlpPolicy", env, verbose=1, learning_rate=1e-3, exploration_fraction=0.1)
+    else:
+        model = PPO("MlpPolicy", env, verbose=1)
         
-        for step in range(steps_per_episode):
-            # Epsilon-greedy action
-            if random.random() < epsilon:
-                action = random.randint(0, 1) # Explore
-            else:
-                action = np.argmax(q_table[state]) # Exploit
-                
-            next_state, reward, cleared = env.step(action)
-            
-            # Learn: Update Q-value
-            best_next_action = np.argmax(q_table[next_state])
-            td_target = reward + gamma * q_table[next_state][best_next_action]
-            td_error = td_target - q_table[state][action]
-            q_table[state][action] += alpha * td_error
-            
-            state = next_state
-            total_reward += reward
-            throughput += cleared
-            
-        epsilon = max(min_epsilon, epsilon * epsilon_decay)
-        
-        if (ep + 1) % 200 == 0:
-            print(f"Episode {ep + 1}/{episodes} - Total Wait: {-total_reward} - Throughput: {throughput} cars")
-            
-        history.append({'episode': ep + 1, 'reward': total_reward, 'throughput': throughput})
-
-    # Output models directly to React src to satisfy Phase 2
-    out_path_table = '../../client/src/q_table.json'
+    print(f"Starting training with {algo}...")
+    model.learn(total_timesteps=total_timesteps)
     
-    with open(out_path_table, 'w') as f:
-        json.dump(q_table.tolist(), f)
-    with open('../../client/src/training_history.json', 'w') as f:
-        json.dump(history, f)
-        
-    print(f"Finished! Saved model to {out_path_table}")
+    model_path = f"traffic_{algo.lower()}_model"
+    model.save(model_path)
+    print(f"Model saved to {model_path}")
+    return model_path
 
 if __name__ == "__main__":
-    train_agent()
+    train_model(algo="DQN", total_timesteps=20000)

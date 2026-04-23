@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import axios from 'axios';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -26,6 +27,9 @@ class TrafficSimulation {
     this.tickRate = 800; // Simulated ms per step
     this.intervalId = null;
     this.spawnRate = 0.4;
+    this.lanes = 4;
+    this.intersection = 1;
+    this.timeInPhase = 0;
   }
 
   start() {
@@ -49,35 +53,51 @@ class TrafficSimulation {
     this.cleared = 0;
     this.broadcastState();
   }
-
-  tick() {
-    // 1. Give State to Agent (Capping visually to 10 max arrays bounds)
-    const stateNs = Math.min(this.nsQueue, 10);
-    const stateEw = Math.min(this.ewQueue, 10);
-
+  async tick() {
+    // 1. Try to get action from FastAPI, fallback to Q-Table
     let action = 0;
-    if (qTable && qTable[stateNs] && qTable[stateNs][stateEw] && qTable[stateNs][stateEw][this.light]) {
-      const actions = qTable[stateNs][stateEw][this.light];
-      // Trained Action logic using argmax
-      action = (actions[1] > actions[0]) ? 1 : 0;
+    this.timeInPhase++;
+
+    try {
+      const response = await axios.post('http://localhost:8000/predict', {
+        ns_queue: this.nsQueue,
+        ew_queue: this.ewQueue,
+        light: this.light,
+        time_in_phase: this.timeInPhase
+      }, { timeout: 100 }); // Fast timeout for real-time feel
+
+      action = response.data.action;
+      // console.log("[AI] FastAPI Action:", action);
+    } catch (e) {
+      // Fallback to local Q-Table logic if FastAPI is down
+      const stateNs = Math.min(this.nsQueue, 10);
+      const stateEw = Math.min(this.ewQueue, 10);
+      if (qTable && qTable[stateNs] && qTable[stateNs][stateEw] && qTable[stateNs][stateEw][this.light]) {
+        const actions = qTable[stateNs][stateEw][this.light];
+        action = (actions[1] > actions[0]) ? 1 : 0;
+      }
     }
 
     // 2. Apply Agent Action
-    let currentLight = this.light;
     if (action === 1) {
-      currentLight = 1 - currentLight;
-      this.light = currentLight;
+      this.light = 1 - this.light;
+      this.timeInPhase = 0;
     }
+    let currentLight = this.light;
 
-    // 3. Clear Traffic
+    // 3. Clear Traffic (Lanes affect clearing speed)
     let trafficCleared = 0;
+    const clearBatch = Math.ceil(this.lanes / 2); // 2 lanes = 1 car/tick, 4 lanes = 2 cars/tick
+    
     if (currentLight === 0 && this.nsQueue > 0) {
-      this.nsQueue--;
-      trafficCleared++;
+      const toClear = Math.min(this.nsQueue, clearBatch);
+      this.nsQueue -= toClear;
+      trafficCleared += toClear;
     }
     if (currentLight === 1 && this.ewQueue > 0) {
-      this.ewQueue--;
-      trafficCleared++;
+      const toClear = Math.min(this.ewQueue, clearBatch);
+      this.ewQueue -= toClear;
+      trafficCleared += toClear;
     }
     this.cleared += trafficCleared;
 
@@ -96,7 +116,9 @@ class TrafficSimulation {
       light: this.light,
       cleared: this.cleared,
       isRunning: this.isRunning,
-      spawnRate: this.spawnRate
+      spawnRate: this.spawnRate,
+      lanes: this.lanes,
+      intersection: this.intersection
     });
   }
 }
@@ -123,6 +145,14 @@ export const initializeSimulation = (io) => {
     socket.on('pause_sim', () => globalSim.pause());
     socket.on('reset_sim', () => globalSim.reset());
     socket.on('set_spawn_rate', (rate) => { globalSim.spawnRate = rate; globalSim.broadcastState(); });
+
+    socket.on('update_config', (config) => {
+      console.log("[Sim] Updating configuration:", config);
+      if (config.lanes) globalSim.lanes = config.lanes;
+      if (config.intersection) globalSim.intersection = config.intersection;
+      // You can add more logic here to handle other parameters
+      globalSim.broadcastState();
+    });
 
     socket.on('disconnect', () => {
       console.log(`[Socket] User disconnected from Traffic Sim: ${socket.id}`);
