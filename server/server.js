@@ -7,6 +7,7 @@ import { Server } from "socket.io";
 
 import connectDB from "./config/mongodb.js";
 import authRoutes from "./routes/authRoutes.js";
+import trafficRoutes from "./routes/trafficRoutes.js";
 import userAuth from "./middleware/userAuth.js";
 import { initializeSimulation } from "./services/trafficSim.js";
 
@@ -26,13 +27,14 @@ app.use(
 
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/traffic", trafficRoutes);
 
 // Protected route: check if user is logged in (used by frontend)
 app.get("/api/auth/check", userAuth, (req, res) => {
   res.json({ success: true, userId: req.userId });
 });
 
-// Use fallback port
+// Port
 const PORT = process.env.PORT || 5000;
 
 // Socket setup

@@ -8,6 +8,7 @@ import Navbar from "./components/Navbar";
 import Welcome from "./pages/Welcome";
 import TrafficSimulation from "./pages/TrafficSimulation";
 import SetupAutomation from "./pages/SetupAutomation";
+import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 // Wrapper that conditionally shows the Navbar
@@ -23,12 +24,12 @@ const AppLayout = () => {
         <Route path='/' element={<Home />} />
         <Route path='/login' element={<Login />} />
         <Route path='/register' element={<Register />} />
-        {/* <Route path="/email-verify/:token" element={<EmailVerify />} /> */}
         <Route path="/verify-email" element={<VerifyEmail />} />
         <Route path='/reset-password' element={<ResetPassword />} />
         <Route path="/welcome" element={<Welcome />} />
         <Route path="/setup-automation" element={<ProtectedRoute><SetupAutomation /></ProtectedRoute>} />
         <Route path="/simulation" element={<ProtectedRoute><TrafficSimulation /></ProtectedRoute>} />
+        <Route path="/dashboard" element={<Dashboard />} />
       </Routes>
     </>
   );
