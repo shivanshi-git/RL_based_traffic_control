@@ -97,12 +97,16 @@ export const login = async (req, res) => {
       });
     }
 
+    // [DEV ONLY] Disabling verification check for easier local testing
+    /*
     if (!user.isVerified) {
       return res.status(403).json({
         success: false,
         message: "Please verify your email first",
       });
     }
+    */
+    console.log(`Login attempt for: ${email}`);
 
     const isMatch = await bcrypt.compare(password, user.password);
 

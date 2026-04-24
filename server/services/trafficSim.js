@@ -26,7 +26,7 @@ class TrafficSimulation {
     this.reward = 0;
     this.cumulativeReward = 0;
     this.isRunning = false;
-    this.tickRate = 800; // Simulated ms per step
+    this.tickRate = 300; // Simulated ms per step
     this.intervalId = null;
     this.spawnRate = 0.4;
     this.lanes = 4;
