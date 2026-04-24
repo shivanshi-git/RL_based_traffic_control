@@ -5,10 +5,13 @@ import fs from 'fs'
 export default defineConfig({
   plugins: [react()],
   server: {
+    host: "0.0.0.0",   // 👈 IMPORTANT for Docker
+    port: 5173,
     https: {
-      key: fs.readFileSync('../certs/localhost-key.pem'),
-      cert: fs.readFileSync('../certs/localhost.pem'),
-    },
-    port: 5173
+      key: fs.readFileSync('/app/certs/localhost-key.pem'),   // ✅ FIXED
+      cert: fs.readFileSync('/app/certs/localhost.pem'),      // ✅ FIXED
+    }
   }
 })
+
+

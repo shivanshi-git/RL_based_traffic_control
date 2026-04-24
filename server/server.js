@@ -40,8 +40,8 @@ app.get("/api/auth/check", userAuth, (req, res) => {
 
 // ================= HTTPS CERT =================
 const options = {
-  key: fs.readFileSync("../certs/localhost-key.pem"),
-  cert: fs.readFileSync("../certs/localhost.pem"),
+  key: fs.readFileSync("/app/certs/localhost-key.pem"),   // ✅ FIXED
+  cert: fs.readFileSync("/app/certs/localhost.pem"),      // ✅ FIXED
 };
 
 // ================= CREATE HTTPS SERVER =================
