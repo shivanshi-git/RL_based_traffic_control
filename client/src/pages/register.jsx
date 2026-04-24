@@ -1,9 +1,8 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import API from "../api/axios";
 
 const Register = () => {
-
   const navigate = useNavigate();
 
   const [name, setName] = useState("");
@@ -22,61 +21,136 @@ const Register = () => {
 
       alert(res.data.message);
       navigate("/verify-email");
-
     } catch (error) {
       alert(error.response?.data?.message || "Registration failed");
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-[#b4c6fc] to-[#c79dfc] px-4">
+    <>
+      <style>{`
+        .reg-root {
+          min-height: 100vh;
+          background: #050810; /* SAME AS LOGIN */
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-family: 'Rajdhani', sans-serif;
+        }
 
-      <div className="bg-[#0b1533] w-full max-w-md rounded-2xl p-10 shadow-2xl">
+        .reg-box {
+          width: 420px;
+          padding: 40px;
+          background: rgba(10, 15, 30, 0.7);
+          border: 1px solid rgba(0, 200, 150, 0.15);
+          backdrop-filter: blur(10px);
+        }
 
-        <h2 className="text-2xl font-semibold text-white text-center">
-          Create Account
-        </h2>
+        .reg-title {
+          color: #e8f5f0;
+          font-size: 26px;
+          font-weight: 700;
+          margin-bottom: 6px;
+        }
 
-        <form onSubmit={handleRegister}>
+        .reg-sub {
+          color: rgba(0,200,150,0.6);
+          font-size: 12px;
+          letter-spacing: 0.2em;
+          margin-bottom: 25px;
+        }
 
-          <input
-            type="text"
-            placeholder="Full Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full mb-4 px-5 py-3 rounded-full bg-[#1b254b] text-white outline-none"
-            required
-          />
+        .reg-input {
+          width: 100%;
+          padding: 12px;
+          margin-bottom: 12px;
+          background: transparent;
+          border: 1px solid rgba(0,200,150,0.2);
+          color: white;
+          outline: none;
+        }
 
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full mb-4 px-5 py-3 rounded-full bg-[#1b254b] text-white outline-none"
-            required
-          />
+        .reg-input:focus {
+          border-color: rgba(0,200,150,0.6);
+        }
 
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full mb-6 px-5 py-3 rounded-full bg-[#1b254b] text-white outline-none"
-            required
-          />
+        .reg-btn {
+          width: 100%;
+          padding: 12px;
+          margin-top: 10px;
+          border: 1px solid rgba(0,200,150,0.5);
+          background: transparent;
+          color: #00c896;
+          cursor: pointer;
+          letter-spacing: 0.15em;
+        }
 
-          <button
-            type="submit"
-            className="w-full py-3 rounded-full text-white font-medium bg-gradient-to-r from-purple-500 to-indigo-500"
-          >
-            Register
-          </button>
+        .reg-btn:hover {
+          background: rgba(0,200,150,0.08);
+        }
 
-        </form>
+        .reg-link {
+          margin-top: 15px;
+          font-size: 12px;
+          color: rgba(255,255,255,0.4);
+          text-align: center;
+        }
 
+        .reg-link a {
+          color: #00c896;
+          text-decoration: none;
+        }
+      `}</style>
+
+      <div className="reg-root">
+
+        <div className="reg-box">
+
+          <div className="reg-title">Create Account</div>
+          <div className="reg-sub">TRAFFIC GRID ACCESS NODE</div>
+
+          <form onSubmit={handleRegister}>
+
+            <input
+              className="reg-input"
+              type="text"
+              placeholder="Full Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+
+            <input
+              className="reg-input"
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+
+            <input
+              className="reg-input"
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+
+            <button className="reg-btn" type="submit">
+              REGISTER
+            </button>
+
+          </form>
+
+          <div className="reg-link">
+            Already inside system? <Link to="/login">Login</Link>
+          </div>
+
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import API from "../api/axios"; // your axios instance
+import API from "../api/axios";
 
 const VerifyEmail = () => {
   const navigate = useNavigate();
@@ -27,69 +27,143 @@ const VerifyEmail = () => {
 
       setMessage(data.message);
 
-      // 🔥 Redirect after 2 seconds
       setTimeout(() => {
         navigate("/login");
       }, 2000);
 
     } catch (error) {
-      setMessage(
-        error.response?.data?.message || "Verification failed"
-      );
+      setMessage(error.response?.data?.message || "Verification failed");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-[#b4c6fc] to-[#c79dfc] px-4">
-      <div className="bg-[#0b1533] w-full max-w-md rounded-2xl p-10 shadow-2xl">
+    <>
+      <style>{`
+        .ver-root {
+          min-height: 100vh;
+          background: #050810; /* SAME SYSTEM BACKGROUND */
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-family: 'Rajdhani', sans-serif;
+        }
 
-        <h2 className="text-2xl font-semibold text-white text-center">
-          Verify Your Email
-        </h2>
+        .ver-box {
+          width: 420px;
+          padding: 40px;
+          background: rgba(10, 15, 30, 0.7);
+          border: 1px solid rgba(0, 200, 150, 0.15);
+          backdrop-filter: blur(10px);
+        }
 
-        <p className="text-gray-400 text-center text-sm mb-8">
-          Enter the OTP sent to your email
-        </p>
+        .ver-title {
+          color: #e8f5f0;
+          font-size: 24px;
+          font-weight: 700;
+          text-align: center;
+          margin-bottom: 6px;
+        }
 
-        <form onSubmit={handleVerify}>
+        .ver-sub {
+          color: rgba(0,200,150,0.6);
+          font-size: 11px;
+          text-align: center;
+          letter-spacing: 0.2em;
+          margin-bottom: 25px;
+          font-family: monospace;
+        }
 
-          {/* Email */}
-          <input
-            type="email"
-            placeholder="Enter your email"
-            className="w-full mb-4 px-4 py-3 rounded-full bg-[#1b254b] text-white outline-none placeholder-gray-400 text-sm"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
+        .ver-input {
+          width: 100%;
+          padding: 12px;
+          margin-bottom: 12px;
+          background: transparent;
+          border: 1px solid rgba(0,200,150,0.2);
+          color: white;
+          outline: none;
+          font-family: monospace;
+        }
 
-          {/* OTP */}
-          <input
-            type="text"
-            placeholder="Enter 6 digit OTP"
-            className="w-full mb-6 px-4 py-3 rounded-full bg-[#1b254b] text-white outline-none placeholder-gray-400 text-sm"
-            value={otp}
-            onChange={(e) => setOtp(e.target.value)}
-          />
+        .ver-input:focus {
+          border-color: rgba(0,200,150,0.6);
+        }
 
-          {/* Button */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 rounded-full text-white font-medium bg-gradient-to-r from-purple-500 to-indigo-500 hover:opacity-90 transition"
-          >
-            {loading ? "Verifying..." : "Verify Email"}
-          </button>
-        </form>
+        .ver-btn {
+          width: 100%;
+          padding: 12px;
+          margin-top: 10px;
+          border: 1px solid rgba(0,200,150,0.5);
+          background: transparent;
+          color: #00c896;
+          cursor: pointer;
+          letter-spacing: 0.15em;
+          font-weight: 600;
+        }
 
-        {message && (
-          <p className="text-center text-sm mt-4 text-purple-400">
-            {message}
-          </p>
-        )}
+        .ver-btn:hover {
+          background: rgba(0,200,150,0.08);
+        }
+
+        .ver-btn:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
+        .ver-msg {
+          text-align: center;
+          margin-top: 14px;
+          font-size: 12px;
+          color: rgba(0,200,150,0.8);
+          font-family: monospace;
+        }
+      `}</style>
+
+      <div className="ver-root">
+
+        <div className="ver-box">
+
+          <div className="ver-title">Email Verification</div>
+          <div className="ver-sub">GRID AUTHENTICATION MODULE</div>
+
+          <form onSubmit={handleVerify}>
+
+            <input
+              className="ver-input"
+              type="email"
+              placeholder="OPERATOR EMAIL"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+
+            <input
+              className="ver-input"
+              type="text"
+              placeholder="6-DIGIT OTP"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+            />
+
+            <button
+              className="ver-btn"
+              type="submit"
+              disabled={loading}
+            >
+              {loading ? "VERIFYING..." : "VERIFY ACCESS"}
+            </button>
+
+          </form>
+
+          {message && (
+            <div className="ver-msg">
+              {message}
+            </div>
+          )}
+
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
