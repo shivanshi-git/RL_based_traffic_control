@@ -15,7 +15,7 @@ const Header = () => {
 
       {/* Greeting */}
       <h3 className="text-lg text-gray-600 mb-2">
-        Hey Developer 👋
+        Hello Developer 👋
       </h3>
 
       {/* Main Heading */}
