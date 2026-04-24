@@ -179,7 +179,7 @@ export default function TrafficSimulation() {
             .filter(c => c.direction === dir)
             .sort((a, b) => sign * (b.pos - a.pos));
 
-          lane.forEach((car, i) => {
+          lane.forEach((car) => {
             const sameLaneCars = lane.filter(c => c.lane === car.lane);
             const carIdxInLane = sameLaneCars.findIndex(c => c.id === car.id);
             const leader = sameLaneCars[carIdxInLane - 1];
@@ -187,14 +187,20 @@ export default function TrafficSimulation() {
 
             // ── Red light: stop before stop line ──
             if (!green) {
-              // Centre of car when front is at stopP
-              const maxCentre = stopP - sign * CAR_H / 2;
-              maxPos = sign > 0 ? Math.min(maxPos, maxCentre) : Math.max(maxPos, maxCentre);
+              const carFront = car.pos + sign * (CAR_H / 2);
+              const isBeforeStop = sign > 0 ? carFront < stopP : carFront > stopP;
+              
+              if (isBeforeStop) {
+                const maxCentre = stopP - sign * (CAR_H / 2);
+                maxPos = sign > 0 ? Math.min(maxPos, maxCentre) : Math.max(maxPos, maxCentre);
+              }
             }
 
             // ── Car-following: maintain gap behind leader ──
             if (leader) {
-              const leaderBack = leader.pos - sign * (CAR_H / 2);
+              // Get the actual leader's current pos (it was updated in a previous iteration of THIS loop)
+              const actualLeader = next.find(c => c.id === leader.id);
+              const leaderBack = actualLeader.pos - sign * (CAR_H / 2);
               const safeCentre = leaderBack - sign * (CAR_GAP + CAR_H / 2);
               maxPos = sign > 0 ? Math.min(maxPos, safeCentre) : Math.max(maxPos, safeCentre);
             }
@@ -203,7 +209,9 @@ export default function TrafficSimulation() {
             const newPos = sign > 0 ? Math.min(desired, maxPos) : Math.max(desired, maxPos);
 
             const ni = next.findIndex(c => c.id === car.id);
-            if (ni !== -1) next[ni] = { ...next[ni], pos: newPos, stopped: Math.abs(newPos - car.pos) < 0.05 };
+            if (ni !== -1) {
+               next[ni] = { ...next[ni], pos: newPos, stopped: Math.abs(newPos - car.pos) < 0.05 };
+            }
           });
         });
 

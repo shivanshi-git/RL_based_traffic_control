@@ -33,6 +33,8 @@ class TrafficSimulation {
     this.intersection = 1;
     this.timeInPhase = 0;
     this.simMode = 'intersection';
+    this.nsWait = [];
+    this.ewWait = [];
   }
 
   start() {
@@ -96,36 +98,50 @@ class TrafficSimulation {
 
     // 3. Clear Traffic (Lanes affect clearing speed)
     let trafficCleared = 0;
-    const clearBatch = Math.ceil(this.lanes / 2); // 2 lanes = 1 car/tick, 4 lanes = 2 cars/tick
+    const clearBatch = Math.ceil(this.lanes / 2);
     
     if (currentLight === 0 && this.nsQueue > 0) {
       const toClear = Math.min(this.nsQueue, clearBatch);
       this.nsQueue -= toClear;
       trafficCleared += toClear;
+      this.nsWait.splice(0, toClear); // Remove oldest
     }
     if (currentLight === 1 && this.ewQueue > 0) {
       const toClear = Math.min(this.ewQueue, clearBatch);
       this.ewQueue -= toClear;
       trafficCleared += toClear;
+      this.ewWait.splice(0, toClear); // Remove oldest
     }
     this.cleared += trafficCleared;
 
-    // 4. Spawn new cars randomly dynamically
-    if (Math.random() < this.spawnRate) this.nsQueue = Math.min(this.nsQueue + 1, 10);
+    // 4. Spawn new cars & Increment wait times
+    this.nsWait = this.nsWait.map(t => t + 1);
+    this.ewWait = this.ewWait.map(t => t + 1);
+
+    if (Math.random() < this.spawnRate) {
+      this.nsQueue = Math.min(this.nsQueue + 1, 10);
+      this.nsWait.push(0);
+    }
     if (this.simMode === 'intersection') {
-      if (Math.random() < this.spawnRate) this.ewQueue = Math.min(this.ewQueue + 1, 10);
+      if (Math.random() < this.spawnRate) {
+        this.ewQueue = Math.min(this.ewQueue + 1, 10);
+        this.ewWait.push(0);
+      }
     } else {
       this.ewQueue = 0;
+      this.ewWait = [];
     }
 
-    // 5. Calculate Reward (Matching logic from train.py)
-    // Penalty for queues
+    // 5. Calculate Reward (Real-world weighted penalty)
     const totalQueue = this.nsQueue + (this.simMode === 'intersection' ? this.ewQueue : 0);
-    let currentReward = -totalQueue;
+    const totalWait = (this.nsWait.reduce((a, b) => a + b, 0) + this.ewWait.reduce((a, b) => a + b, 0));
+    
+    // Penalty for queues AND cumulative wait time
+    let currentReward = -(totalQueue * 1.5) - (totalWait * 0.2);
     // Bonus for clearing traffic
-    currentReward += trafficCleared * 5.0;
-    // Penalty for switching (to avoid flickering)
-    if (switched) currentReward -= 2.0;
+    currentReward += trafficCleared * 10.0;
+    // Penalty for switching
+    if (switched) currentReward -= 5.0;
 
     this.reward = currentReward;
     this.cumulativeReward += currentReward;
