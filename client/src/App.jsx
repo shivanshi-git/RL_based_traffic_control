@@ -6,6 +6,7 @@ import VerifyEmail from "./pages/VerifyEmail";
 import ResetPassword from "./pages/resetpassword";
 import Navbar from "./components/Navbar";
 import Welcome from "./pages/Welcome";
+import Dashboard from "./pages/Dashboard";
 
 const App = () => {
   return (
@@ -17,10 +18,13 @@ const App = () => {
         <Route path='/' element={<Home />} />
         <Route path='/login' element={<Login />} />
         <Route path='/register' element={<Register />} />
-        {/* <Route path="/email-verify/:token" element={<EmailVerify />} /> */}
         <Route path="/verify-email" element={<VerifyEmail />} />
         <Route path='/reset-password' element={<ResetPassword />} />
         <Route path="/welcome" element={<Welcome />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+
+        {/* ✅ NEW DASHBOARD ROUTE */}
+        <Route path="/dashboard" element={<Dashboard />} />
       </Routes>
 
     </BrowserRouter>

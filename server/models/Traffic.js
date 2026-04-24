@@ -1,11 +1,25 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
-const TrafficSchema = new mongoose.Schema({
-  state: [Number],
-  action: Number,
-  reward: Number,
-  type: String, // "RL" or "FIXED"
-  timestamp: { type: Date, default: Date.now }
-});
+const trafficSchema = new mongoose.Schema({
+  state: {
+    type: [Number],
+    required: true
+  },
+  action: {
+    type: String,
+    required: true
+  },
+  reward: {
+    type: Number,
+    required: true
+  },
+  type: {
+    type: String,
+    enum: ["RL", "FIXED"],
+    required: true
+  }
+}, { timestamps: true });
 
-module.exports = mongoose.model("Traffic", TrafficSchema);
+const Traffic = mongoose.model("Traffic", trafficSchema);
+
+export default Traffic;

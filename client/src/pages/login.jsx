@@ -21,7 +21,7 @@ const Login = () => {
       alert(res.data.message || "Login successful");
 
       // 🔥 Redirect after login
-      navigate("/welcome");
+      navigate("/dashboard");
 
     } catch (error) {
       alert(error.response?.data?.message || "Login failed");

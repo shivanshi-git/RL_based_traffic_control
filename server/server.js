@@ -3,17 +3,11 @@ import dotenv from "dotenv";
 import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+
 import authRoutes from "./routes/authRoutes.js";
+import trafficRoutes from "./routes/trafficRoutes.js"; // ✅ ADD THIS
 
 dotenv.config();
-
-
-
-
-
-
-
-
 
 const app = express();
 
@@ -22,18 +16,19 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: ["http://localhost:5173"],
+    origin: ["http://localhost:5174"],
     credentials: true,
   })
 );
 
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/traffic", trafficRoutes); // ✅ ADD THIS
 
-// Use fallback port
+// Port
 const PORT = process.env.PORT || 5000;
 
-// Connect DB
+// DB + Server
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
