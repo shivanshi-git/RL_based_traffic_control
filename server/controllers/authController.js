@@ -13,6 +13,8 @@ const generateToken = (id) => {
 
 // ================= REGISTER =================
 export const register = async (req, res) => {
+  console.log("REGISTER HIT:", req.body); // ✅ DEBUG
+
   try {
     const { name, email, password } = req.body;
 
@@ -57,17 +59,23 @@ export const register = async (req, res) => {
       isVerified: false,
     });
 
-    await transporter.sendMail({
-      from: `"Your App" <${process.env.SMTP_USER}>`,
-      to: email,
-      subject: "Verify Your Email",
-      html: `
-        <h2>Hello ${name}</h2>
-        <p>Your verification OTP is:</p>
-        <h1>${otp}</h1>
-        <p>This OTP expires in 10 minutes.</p>
-      `,
-    });
+    // ✅ SAFE EMAIL SEND (won’t crash register)
+    try {
+      await transporter.sendMail({
+        from: `"Your App" <${process.env.SMTP_USER}>`,
+        to: email,
+        subject: "Verify Your Email",
+        html: `
+          <h2>Hello ${name}</h2>
+          <p>Your verification OTP is:</p>
+          <h1>${otp}</h1>
+          <p>This OTP expires in 10 minutes.</p>
+        `,
+      });
+      console.log("✅ Email sent");
+    } catch (mailError) {
+      console.log("❌ EMAIL ERROR:", mailError.message);
+    }
 
     return res.status(201).json({
       success: true,
@@ -75,10 +83,10 @@ export const register = async (req, res) => {
     });
 
   } catch (error) {
-    console.log("REGISTER ERROR:", error);
+    console.log("❌ REGISTER ERROR:", error);
     return res.status(500).json({
       success: false,
-      message: "Server error during registration",
+      message: error.message || "Server error during registration",
     });
   }
 };
@@ -117,7 +125,7 @@ export const login = async (req, res) => {
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: false,
+      secure: false, // (later change to true in production HTTPS)
       sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
@@ -175,15 +183,16 @@ export const sendVerificationOtp = async (req, res) => {
 
     await user.save();
 
-    await transporter.sendMail({
-      from: `"Your App" <${process.env.SMTP_USER}>`,
-      to: email,
-      subject: "Email Verification OTP",
-      html: `
-        <h2>Your OTP is: ${otp}</h2>
-        <p>This OTP is valid for 10 minutes.</p>
-      `,
-    });
+    try {
+      await transporter.sendMail({
+        from: `"Your App" <${process.env.SMTP_USER}>`,
+        to: email,
+        subject: "Email Verification OTP",
+        html: `<h2>Your OTP is: ${otp}</h2>`,
+      });
+    } catch (mailError) {
+      console.log("EMAIL ERROR:", mailError.message);
+    }
 
     return res.json({
       success: true,
@@ -274,15 +283,16 @@ export const forgotPassword = async (req, res) => {
 
     await user.save();
 
-    await transporter.sendMail({
-      from: `"Your App" <${process.env.SMTP_USER}>`,
-      to: email,
-      subject: "Reset Password OTP",
-      html: `
-        <h2>Your Password Reset OTP: ${otp}</h2>
-        <p>This OTP is valid for 10 minutes.</p>
-      `,
-    });
+    try {
+      await transporter.sendMail({
+        from: `"Your App" <${process.env.SMTP_USER}>`,
+        to: email,
+        subject: "Reset Password OTP",
+        html: `<h2>${otp}</h2>`,
+      });
+    } catch (mailError) {
+      console.log("EMAIL ERROR:", mailError.message);
+    }
 
     return res.json({
       success: true,

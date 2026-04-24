@@ -2,7 +2,8 @@ import express from "express";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import { createServer } from "http";
+import https from "https";
+import fs from "fs";
 import { Server } from "socket.io";
 
 import connectDB from "./config/mongodb.js";
@@ -13,51 +14,67 @@ import { initializeSimulation } from "./services/trafficSim.js";
 
 dotenv.config();
 
+// ✅ CREATE APP FIRST
 const app = express();
 
-// Middleware
+// ================= MIDDLEWARE =================
 app.use(express.json());
 app.use(cookieParser());
+
+// ✅ FIXED CORS (IMPORTANT)
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://localhost:5174"],
+    origin: ["https://localhost:5173"],
     credentials: true,
   })
 );
 
-// Routes
+// ================= ROUTES =================
 app.use("/api/auth", authRoutes);
 app.use("/api/traffic", trafficRoutes);
 
-// Protected route: check if user is logged in (used by frontend)
+// Protected route
 app.get("/api/auth/check", userAuth, (req, res) => {
   res.json({ success: true, userId: req.userId });
 });
 
-// Port
-const PORT = process.env.PORT || 5000;
+// ================= HTTPS CERT =================
+const options = {
+  key: fs.readFileSync("../certs/localhost-key.pem"),
+  cert: fs.readFileSync("../certs/localhost.pem"),
+};
 
-// Socket setup
-const httpServer = createServer(app);
-const io = new Server(httpServer, {
+// ================= CREATE HTTPS SERVER =================
+const httpsServer = https.createServer(options, app);
+
+// ================= SOCKET.IO =================
+const io = new Server(httpsServer, {
   cors: {
-    origin: ["http://localhost:5173", "http://localhost:5174", "http://localhost:3000"],
+    origin: ["https://localhost:5173"],
     credentials: true,
-  }
+  },
 });
 
-// Initialize RL Traffic Simulation
+io.on("connection", (socket) => {
+  console.log("🟢 SOCKET CONNECTED:", socket.id);
+});
+
+// ================= START RL SIM =================
 initializeSimulation(io);
 
-// Connect DB then start server
-connectDB().then(() => {
-  httpServer.listen(PORT, () =>
-    console.log(`Server running on port ${PORT} with Sockets initialized`)
-  );
-}).catch((err) => {
-  console.error("Failed to connect to MongoDB:", err.message);
-  // Still start the server so simulation works even without DB
-  httpServer.listen(PORT, () =>
-    console.log(`Server running on port ${PORT} (DB unavailable)`)
-  );
-});
+// ================= PORT =================
+const PORT = process.env.PORT || 5000;
+
+// ================= START SERVER =================
+connectDB()
+  .then(() => {
+    httpsServer.listen(PORT, () => {
+      console.log(`🚀 HTTPS Server running on https://localhost:${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error("DB failed:", err.message);
+    httpsServer.listen(PORT, () => {
+      console.log(`⚠️ Server running without DB on https://localhost:${PORT}`);
+    });
+  });

@@ -126,22 +126,45 @@ export default function TrafficSimulation() {
   stRef.current = simState;
 
   // ── Socket ─────────────────────────────────────────────────────────────────
-  useEffect(() => {
-    const s = io('http://localhost:5000', { withCredentials: true });
-    s.on('connect', () => {
-      setConnected(true); setSocket(s);
-      try { const c = localStorage.getItem('automationConfig'); if (c) s.emit('update_config', JSON.parse(c)); } catch { }
+useEffect(() => {
+  const s = io("https://localhost:5000", {
+    withCredentials: true,
+    transports: ["websocket"],
+  });
+
+  s.on("connect", () => {
+    console.log("🟢 CONNECTED:", s.id); // 🔥 ADD THIS
+    setConnected(true);
+    setSocket(s);
+
+    try {
+      const c = localStorage.getItem("automationConfig");
+      if (c) s.emit("update_config", JSON.parse(c));
+    } catch {}
+  });
+
+  s.on("disconnect", () => {
+    console.log("🔴 DISCONNECTED");
+    setConnected(false);
+  });
+
+  s.on("connect_error", (err) => {
+    console.log("❌ SOCKET ERROR:", err.message); // 🔥 IMPORTANT
+  });
+
+  s.on("sim_update", (d) => {
+    setSimState(d);
+    setPerfData((p) => {
+      const n = [
+        ...p,
+        { t: new Date().toLocaleTimeString(), v: d.cleared, r: d.reward },
+      ];
+      return n.length > 30 ? n.slice(1) : n;
     });
-    s.on('disconnect', () => setConnected(false));
-    s.on('sim_update', d => {
-      setSimState(d);
-      setPerfData(p => { 
-        const n = [...p, { t: new Date().toLocaleTimeString(), v: d.cleared, r: d.reward }]; 
-        return n.length > 30 ? n.slice(1) : n; 
-      });
-    });
-    return () => s.close();
-  }, []);
+  });
+
+  return () => s.close();
+}, []);
 
   // ── Animation loop ─────────────────────────────────────────────────────────
   useEffect(() => {
