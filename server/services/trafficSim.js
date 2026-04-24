@@ -23,6 +23,8 @@ class TrafficSimulation {
     this.ewQueue = 0;
     this.light = 0; // 0=NS, 1=EW
     this.cleared = 0;
+    this.reward = 0;
+    this.cumulativeReward = 0;
     this.isRunning = false;
     this.tickRate = 800; // Simulated ms per step
     this.intervalId = null;
@@ -30,6 +32,7 @@ class TrafficSimulation {
     this.lanes = 4;
     this.intersection = 1;
     this.timeInPhase = 0;
+    this.simMode = 'intersection';
   }
 
   start() {
@@ -51,6 +54,8 @@ class TrafficSimulation {
     this.ewQueue = 0;
     this.light = 0;
     this.cleared = 0;
+    this.reward = 0;
+    this.cumulativeReward = 0;
     this.broadcastState();
   }
   async tick() {
@@ -81,9 +86,11 @@ class TrafficSimulation {
     }
 
     // 2. Apply Agent Action
+    let switched = false;
     if (action === 1) {
       this.light = 1 - this.light;
       this.timeInPhase = 0;
+      switched = true;
     }
     let currentLight = this.light;
 
@@ -105,7 +112,23 @@ class TrafficSimulation {
 
     // 4. Spawn new cars randomly dynamically
     if (Math.random() < this.spawnRate) this.nsQueue = Math.min(this.nsQueue + 1, 10);
-    if (Math.random() < this.spawnRate) this.ewQueue = Math.min(this.ewQueue + 1, 10);
+    if (this.simMode === 'intersection') {
+      if (Math.random() < this.spawnRate) this.ewQueue = Math.min(this.ewQueue + 1, 10);
+    } else {
+      this.ewQueue = 0;
+    }
+
+    // 5. Calculate Reward (Matching logic from train.py)
+    // Penalty for queues
+    const totalQueue = this.nsQueue + (this.simMode === 'intersection' ? this.ewQueue : 0);
+    let currentReward = -totalQueue;
+    // Bonus for clearing traffic
+    currentReward += trafficCleared * 5.0;
+    // Penalty for switching (to avoid flickering)
+    if (switched) currentReward -= 2.0;
+
+    this.reward = currentReward;
+    this.cumulativeReward += currentReward;
 
     // Broadcast globally to all watchers
     this.broadcastState();
@@ -117,10 +140,13 @@ class TrafficSimulation {
       ewQueue: this.ewQueue,
       light: this.light,
       cleared: this.cleared,
+      reward: this.reward,
+      cumulativeReward: this.cumulativeReward,
       isRunning: this.isRunning,
       spawnRate: this.spawnRate,
       lanes: this.lanes,
-      intersection: this.intersection
+      intersection: this.intersection,
+      simMode: this.simMode
     });
   }
 }
@@ -152,7 +178,7 @@ export const initializeSimulation = (io) => {
       console.log("[Sim] Updating configuration:", config);
       if (config.lanes) globalSim.lanes = config.lanes;
       if (config.intersection) globalSim.intersection = config.intersection;
-      // You can add more logic here to handle other parameters
+      if (config.simMode) globalSim.simMode = config.simMode;
       globalSim.broadcastState();
     });
 
