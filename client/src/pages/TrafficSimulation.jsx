@@ -33,7 +33,7 @@
 // //           }
 // //         }
 // //     });
-    
+
 // //     newSocket.on('disconnect', () => {
 // //         setIsConnected(false);
 // //     });
@@ -41,7 +41,7 @@
 // //     // Listen for the simulation state stream continuously
 // //     newSocket.on('sim_update', (data) => {
 // //       setState(data);
-      
+
 // //       // Update chart data (keeping last 20 points)
 // //       setPerformanceData(prev => {
 // //         const newData = [...prev, { time: new Date().toLocaleTimeString(), cleared: data.cleared }];
@@ -84,7 +84,7 @@
 
 // //         <div className="control-panel glass-panel">
 // //             <h3 className="panel-title">SIMULATION CONTROLS</h3>
-            
+
 // //             <div className="slider-wrapper">
 // //                 <div className="slider-header">
 // //                     <label>TRAFFIC SPAWN RATE</label>
@@ -165,15 +165,15 @@
 // //         <svg viewBox="0 0 800 800" className="intersection-svg">
 // //           {/* Background Layer */}
 // //           <rect width="800" height="800" fill="#ffffff" />
-          
+
 // //           {/* North-South Road */}
 // //           <rect x="340" y="0" width="120" height="800" fill="#111116" />
 // //           <line x1="400" y1="0" x2="400" y2="800" stroke="#ffffff" strokeWidth="4" strokeDasharray="20,20" />
-          
+
 // //           {/* East-West Road */}
 // //           <rect x="0" y="340" width="800" height="120" fill="#111116" />
 // //           <line x1="0" y1="400" x2="800" y2="400" stroke="#ffffff" strokeWidth="4" strokeDasharray="20,20" />
-          
+
 // //           {/* Intersection Block */}
 // //           <rect x="340" y="340" width="120" height="120" fill="#16161d" />
 
@@ -181,7 +181,7 @@
 // //           {/* NS Active */}
 // //           <circle cx="475" cy="325" r="14" className={`svg-light ${state.light === 0 ? 'svg-green' : 'svg-red'}`} />
 // //           <circle cx="325" cy="475" r="14" className={`svg-light ${state.light === 0 ? 'svg-green' : 'svg-red'}`} />
-          
+
 // //           {/* EW Active */}
 // //           <circle cx="325" cy="325" r="14" className={`svg-light ${state.light === 1 ? 'svg-green' : 'svg-red'}`} />
 // //           <circle cx="475" cy="475" r="14" className={`svg-light ${state.light === 1 ? 'svg-green' : 'svg-red'}`} />
@@ -746,24 +746,24 @@ const W = 800, H = 800;
 const ROAD_W = 144;
 const CX = W / 2, CY = H / 2;
 
-const ROAD_NS_LEFT  = CX - ROAD_W / 2;  // 328
+const ROAD_NS_LEFT = CX - ROAD_W / 2;  // 328
 const ROAD_NS_RIGHT = CX + ROAD_W / 2;  // 472
-const ROAD_EW_TOP   = CY - ROAD_W / 2;  // 328
-const ROAD_EW_BOT   = CY + ROAD_W / 2;  // 472
+const ROAD_EW_TOP = CY - ROAD_W / 2;  // 328
+const ROAD_EW_BOT = CY + ROAD_W / 2;  // 472
 
 const IX1 = ROAD_NS_LEFT, IX2 = ROAD_NS_RIGHT;
-const IY1 = ROAD_EW_TOP,  IY2 = ROAD_EW_BOT;
+const IY1 = ROAD_EW_TOP, IY2 = ROAD_EW_BOT;
 
-const CAR_W  = 24;   // width perpendicular to travel direction
-const CAR_H  = 40;   // length along travel direction
+const CAR_W = 24;   // width perpendicular to travel direction
+const CAR_H = 40;   // length along travel direction
 const CAR_GAP = 8;   // minimum bumper-to-bumper gap
 
 // Single lane centre per direction (left-hand traffic: each direction keeps right)
 const LANE_CENTER = {
-  NS: ROAD_NS_LEFT  + ROAD_W * 0.72,  // ~431 — right side going south
+  NS: ROAD_NS_LEFT + ROAD_W * 0.72,  // ~431 — right side going south
   SN: ROAD_NS_RIGHT - ROAD_W * 0.72,  // ~369 — right side going north
-  EW: ROAD_EW_TOP   + ROAD_W * 0.72,  // ~431 — right side going east
-  WE: ROAD_EW_BOT   - ROAD_W * 0.72,  // ~369 — right side going west
+  EW: ROAD_EW_TOP + ROAD_W * 0.72,  // ~431 — right side going east
+  WE: ROAD_EW_BOT - ROAD_W * 0.72,  // ~369 — right side going west
 };
 
 // Stop position = where the FRONT of a car must halt
@@ -779,46 +779,48 @@ const SIGN = { NS: 1, SN: -1, EW: 1, WE: -1 };
 
 // Starting positions (off screen entry edge)
 const START_POS = { NS: -CAR_H / 2 - 10, SN: H + CAR_H / 2 + 10, EW: -CAR_H / 2 - 10, WE: W + CAR_H / 2 + 10 };
-const END_POS   = { NS: H + CAR_H,        SN: -CAR_H,              EW: W + CAR_H,        WE: -CAR_H };
+const END_POS = { NS: H + CAR_H, SN: -CAR_H, EW: W + CAR_H, WE: -CAR_H };
 
 let uid = 0;
-const COLORS = ['#e63946','#2a9d8f','#e9c46a','#264653','#f4a261','#6a0572','#118ab2','#06d6a0','#ef476f','#457b9d'];
+const COLORS = ['#e63946', '#2a9d8f', '#e9c46a', '#264653', '#f4a261', '#6a0572', '#118ab2', '#06d6a0', '#ef476f', '#457b9d'];
 function makeCar(dir) {
-  return { id: uid++, direction: dir, color: COLORS[uid % COLORS.length],
-           pos: START_POS[dir], speed: 1.7 + Math.random() * 0.7, stopped: false };
+  return {
+    id: uid++, direction: dir, color: COLORS[uid % COLORS.length],
+    pos: START_POS[dir], speed: 1.7 + Math.random() * 0.7, stopped: false
+  };
 }
 
 // ─── Car SVG shape ────────────────────────────────────────────────────────────
 function CarShape({ car }) {
-  const isH  = car.direction === 'EW' || car.direction === 'WE';
+  const isH = car.direction === 'EW' || car.direction === 'WE';
   const flip = car.direction === 'SN' || car.direction === 'WE';
-  const cx   = isH ? car.pos : LANE_CENTER[car.direction];
-  const cy   = isH ? LANE_CENTER[car.direction] : car.pos;
-  const rW   = isH ? CAR_H : CAR_W;
-  const rH   = isH ? CAR_W : CAR_H;
-  const g    = 'rgba(215,240,255,0.82)';
+  const cx = isH ? car.pos : LANE_CENTER[car.direction];
+  const cy = isH ? LANE_CENTER[car.direction] : car.pos;
+  const rW = isH ? CAR_H : CAR_W;
+  const rH = isH ? CAR_W : CAR_H;
+  const g = 'rgba(215,240,255,0.82)';
 
   return (
     <g>
       {/* shadow */}
-      <rect x={cx - rW/2 + 2} y={cy - rH/2 + 4} width={rW} height={rH} rx={5} fill="rgba(0,0,0,0.22)" />
+      <rect x={cx - rW / 2 + 2} y={cy - rH / 2 + 4} width={rW} height={rH} rx={5} fill="rgba(0,0,0,0.22)" />
       {/* body */}
-      <rect x={cx - rW/2} y={cy - rH/2} width={rW} height={rH} rx={5} fill={car.color} />
+      <rect x={cx - rW / 2} y={cy - rH / 2} width={rW} height={rH} rx={5} fill={car.color} />
       {/* cabin glass */}
       {isH
-        ? <rect x={cx - rW/2 + 8} y={cy - rH/2 + 4} width={rW - 20} height={rH - 8} rx={3} fill={g} />
-        : <rect x={cx - rW/2 + 4} y={cy - rH/2 + 8} width={rW - 8} height={rH - 20} rx={3} fill={g} />
+        ? <rect x={cx - rW / 2 + 8} y={cy - rH / 2 + 4} width={rW - 20} height={rH - 8} rx={3} fill={g} />
+        : <rect x={cx - rW / 2 + 4} y={cy - rH / 2 + 8} width={rW - 8} height={rH - 20} rx={3} fill={g} />
       }
       {/* headlights */}
-      {isH && !flip && <><circle cx={cx+rW/2-4} cy={cy-rH/2+5} r={3} fill="#fffde7"/><circle cx={cx+rW/2-4} cy={cy+rH/2-5} r={3} fill="#fffde7"/></>}
-      {isH &&  flip && <><circle cx={cx-rW/2+4} cy={cy-rH/2+5} r={3} fill="#fffde7"/><circle cx={cx-rW/2+4} cy={cy+rH/2-5} r={3} fill="#fffde7"/></>}
-      {!isH && !flip && <><rect x={cx-rW/2+3} y={cy+rH/2-5} width={6} height={4} rx={1} fill="#fffde7"/><rect x={cx+rW/2-9} y={cy+rH/2-5} width={6} height={4} rx={1} fill="#fffde7"/></>}
-      {!isH &&  flip && <><rect x={cx-rW/2+3} y={cy-rH/2+1} width={6} height={4} rx={1} fill="#fffde7"/><rect x={cx+rW/2-9} y={cy-rH/2+1} width={6} height={4} rx={1} fill="#fffde7"/></>}
+      {isH && !flip && <><circle cx={cx + rW / 2 - 4} cy={cy - rH / 2 + 5} r={3} fill="#fffde7" /><circle cx={cx + rW / 2 - 4} cy={cy + rH / 2 - 5} r={3} fill="#fffde7" /></>}
+      {isH && flip && <><circle cx={cx - rW / 2 + 4} cy={cy - rH / 2 + 5} r={3} fill="#fffde7" /><circle cx={cx - rW / 2 + 4} cy={cy + rH / 2 - 5} r={3} fill="#fffde7" /></>}
+      {!isH && !flip && <><rect x={cx - rW / 2 + 3} y={cy + rH / 2 - 5} width={6} height={4} rx={1} fill="#fffde7" /><rect x={cx + rW / 2 - 9} y={cy + rH / 2 - 5} width={6} height={4} rx={1} fill="#fffde7" /></>}
+      {!isH && flip && <><rect x={cx - rW / 2 + 3} y={cy - rH / 2 + 1} width={6} height={4} rx={1} fill="#fffde7" /><rect x={cx + rW / 2 - 9} y={cy - rH / 2 + 1} width={6} height={4} rx={1} fill="#fffde7" /></>}
       {/* tail lights */}
-      {isH && !flip && <><rect x={cx-rW/2}   y={cy-rH/2+3} width={5} height={5} rx={1} fill={car.stopped?'#ff1744':'#aa2222'}/><rect x={cx-rW/2}   y={cy+rH/2-8} width={5} height={5} rx={1} fill={car.stopped?'#ff1744':'#aa2222'}/></>}
-      {isH &&  flip && <><rect x={cx+rW/2-5} y={cy-rH/2+3} width={5} height={5} rx={1} fill={car.stopped?'#ff1744':'#aa2222'}/><rect x={cx+rW/2-5} y={cy+rH/2-8} width={5} height={5} rx={1} fill={car.stopped?'#ff1744':'#aa2222'}/></>}
-      {!isH && !flip && <><rect x={cx-rW/2+3} y={cy-rH/2}   width={6} height={4} rx={1} fill={car.stopped?'#ff1744':'#aa2222'}/><rect x={cx+rW/2-9} y={cy-rH/2}   width={6} height={4} rx={1} fill={car.stopped?'#ff1744':'#aa2222'}/></>}
-      {!isH &&  flip && <><rect x={cx-rW/2+3} y={cy+rH/2-4} width={6} height={4} rx={1} fill={car.stopped?'#ff1744':'#aa2222'}/><rect x={cx+rW/2-9} y={cy+rH/2-4} width={6} height={4} rx={1} fill={car.stopped?'#ff1744':'#aa2222'}/></>}
+      {isH && !flip && <><rect x={cx - rW / 2} y={cy - rH / 2 + 3} width={5} height={5} rx={1} fill={car.stopped ? '#ff1744' : '#aa2222'} /><rect x={cx - rW / 2} y={cy + rH / 2 - 8} width={5} height={5} rx={1} fill={car.stopped ? '#ff1744' : '#aa2222'} /></>}
+      {isH && flip && <><rect x={cx + rW / 2 - 5} y={cy - rH / 2 + 3} width={5} height={5} rx={1} fill={car.stopped ? '#ff1744' : '#aa2222'} /><rect x={cx + rW / 2 - 5} y={cy + rH / 2 - 8} width={5} height={5} rx={1} fill={car.stopped ? '#ff1744' : '#aa2222'} /></>}
+      {!isH && !flip && <><rect x={cx - rW / 2 + 3} y={cy - rH / 2} width={6} height={4} rx={1} fill={car.stopped ? '#ff1744' : '#aa2222'} /><rect x={cx + rW / 2 - 9} y={cy - rH / 2} width={6} height={4} rx={1} fill={car.stopped ? '#ff1744' : '#aa2222'} /></>}
+      {!isH && flip && <><rect x={cx - rW / 2 + 3} y={cy + rH / 2 - 4} width={6} height={4} rx={1} fill={car.stopped ? '#ff1744' : '#aa2222'} /><rect x={cx + rW / 2 - 9} y={cy + rH / 2 - 4} width={6} height={4} rx={1} fill={car.stopped ? '#ff1744' : '#aa2222'} /></>}
     </g>
   );
 }
@@ -843,21 +845,23 @@ export default function TrafficSimulation() {
   const [simState, setSimState] = useState({
     nsQueue: 0, ewQueue: 0, light: 0, cleared: 0, isRunning: false, spawnRate: 0.4,
   });
-  const [perfData, setPerfData]   = useState([]);
-  const [socket, setSocket]       = useState(null);
+  const [perfData, setPerfData] = useState([]);
+  const [socket, setSocket] = useState(null);
   const [connected, setConnected] = useState(false);
-  const [cars, setCars]           = useState([]);
+  const [cars, setCars] = useState([]);
 
-  const rafRef    = useRef(null);
-  const stRef     = useRef(simState);
+  const rafRef = useRef(null);
+  const stRef = useRef(simState);
   const spawnTick = useRef(0);
-  stRef.current   = simState;
+  stRef.current = simState;
 
   // ── Socket ─────────────────────────────────────────────────────────────────
   useEffect(() => {
     const s = io('http://localhost:5000', { withCredentials: true });
-    s.on('connect',    () => { setConnected(true); setSocket(s);
-      try { const c = localStorage.getItem('automationConfig'); if (c) s.emit('update_config', JSON.parse(c)); } catch {} });
+    s.on('connect', () => {
+      setConnected(true); setSocket(s);
+      try { const c = localStorage.getItem('automationConfig'); if (c) s.emit('update_config', JSON.parse(c)); } catch { }
+    });
     s.on('disconnect', () => setConnected(false));
     s.on('sim_update', d => {
       setSimState(d);
@@ -878,7 +882,7 @@ export default function TrafficSimulation() {
         // Spawn
         if (st.isRunning && spawnTick.current % 50 === 0) {
           const rate = st.spawnRate || 0.4;
-          ['NS','SN','EW','WE'].forEach(dir => {
+          ['NS', 'SN', 'EW', 'WE'].forEach(dir => {
             if (Math.random() < rate * 0.5) {
               const lane = next.filter(c => c.direction === dir);
               const blocked = lane.some(c => Math.abs(c.pos - START_POS[dir]) < CAR_H + CAR_GAP + 10);
@@ -888,9 +892,9 @@ export default function TrafficSimulation() {
         }
 
         // Physics — per direction
-        ['NS','SN','EW','WE'].forEach(dir => {
-          const sign  = SIGN[dir];
-          const isNS  = dir === 'NS' || dir === 'SN';
+        ['NS', 'SN', 'EW', 'WE'].forEach(dir => {
+          const sign = SIGN[dir];
+          const isNS = dir === 'NS' || dir === 'SN';
           const green = st.light === 0 ? isNS : !isNS;
           const stopP = STOP_POS[dir];
 
@@ -912,13 +916,13 @@ export default function TrafficSimulation() {
 
             // ── Car-following: maintain gap behind leader ──
             if (leader) {
-              const leaderBack  = leader.pos - sign * (CAR_H / 2);
-              const safeCentre  = leaderBack - sign * (CAR_GAP + CAR_H / 2);
+              const leaderBack = leader.pos - sign * (CAR_H / 2);
+              const safeCentre = leaderBack - sign * (CAR_GAP + CAR_H / 2);
               maxPos = sign > 0 ? Math.min(maxPos, safeCentre) : Math.max(maxPos, safeCentre);
             }
 
             const desired = car.pos + sign * car.speed;
-            const newPos  = sign > 0 ? Math.min(desired, maxPos) : Math.max(desired, maxPos);
+            const newPos = sign > 0 ? Math.min(desired, maxPos) : Math.max(desired, maxPos);
 
             const ni = next.findIndex(c => c.id === car.id);
             if (ni !== -1) next[ni] = { ...next[ni], pos: newPos, stopped: Math.abs(newPos - car.pos) < 0.05 };
@@ -941,8 +945,8 @@ export default function TrafficSimulation() {
   }, []);
 
   const onStartPause = () => { if (!socket) return; simState.isRunning ? socket.emit('pause_sim') : socket.emit('start_sim'); };
-  const onReset      = () => { if (!socket) return; socket.emit('reset_sim'); setCars([]); };
-  const onSpawn      = e  => { if (!socket) return; socket.emit('set_spawn_rate', parseFloat(e.target.value)); };
+  const onReset = () => { if (!socket) return; socket.emit('reset_sim'); setCars([]); };
+  const onSpawn = e => { if (!socket) return; socket.emit('set_spawn_rate', parseFloat(e.target.value)); };
 
   const nsGreen = simState.light === 0;
   const ewGreen = !nsGreen;
@@ -981,15 +985,17 @@ export default function TrafficSimulation() {
           </div>
         </div>
 
-        <div className="glass-panel" style={{ padding:'1.2rem 1.5rem', marginBottom:'1rem' }}>
-          <h3 className="panel-title" style={{ marginBottom:'1rem' }}>SIGNAL STATUS</h3>
-          <div style={{ display:'flex', justifyContent:'space-around' }}>
-            {[['N ↕ S', nsGreen],['E ↔ W', ewGreen]].map(([lbl, g]) => (
-              <div key={lbl} style={{ textAlign:'center' }}>
-                <div style={{ width:18, height:18, borderRadius:'50%', margin:'0 auto 5px',
-                  background: g ? '#00e676' : '#440000', boxShadow: g ? '0 0 12px #00e676' : 'none', transition:'all 0.4s' }} />
-                <div style={{ fontSize:'0.7rem', color:'#8A92A6', letterSpacing:'1px' }}>{lbl}</div>
-                <div style={{ fontSize:'0.78rem', fontWeight:700, color: g ? '#00e676' : '#ff1744', marginTop:3 }}>
+        <div className="glass-panel" style={{ padding: '1.2rem 1.5rem', marginBottom: '1rem' }}>
+          <h3 className="panel-title" style={{ marginBottom: '1rem' }}>SIGNAL STATUS</h3>
+          <div style={{ display: 'flex', justifyContent: 'space-around' }}>
+            {[['N ↕ S', nsGreen], ['E ↔ W', ewGreen]].map(([lbl, g]) => (
+              <div key={lbl} style={{ textAlign: 'center' }}>
+                <div style={{
+                  width: 18, height: 18, borderRadius: '50%', margin: '0 auto 5px',
+                  background: g ? '#00e676' : '#440000', boxShadow: g ? '0 0 12px #00e676' : 'none', transition: 'all 0.4s'
+                }} />
+                <div style={{ fontSize: '0.7rem', color: '#8A92A6', letterSpacing: '1px' }}>{lbl}</div>
+                <div style={{ fontSize: '0.78rem', fontWeight: 700, color: g ? '#00e676' : '#ff1744', marginTop: 3 }}>
                   {g ? 'GREEN' : 'RED'}
                 </div>
               </div>
@@ -1012,14 +1018,14 @@ export default function TrafficSimulation() {
           </div>
         </div>
 
-        <div className="chart-panel glass-panel" style={{ height:190, marginTop:'1.5rem', padding:'1rem' }}>
-          <h3 className="panel-title" style={{ marginBottom:'0.5rem', fontSize:'0.7rem' }}>THROUGHPUT TREND</h3>
+        <div className="chart-panel glass-panel" style={{ height: 190, marginTop: '1.5rem', padding: '1rem' }}>
+          <h3 className="panel-title" style={{ marginBottom: '0.5rem', fontSize: '0.7rem' }}>THROUGHPUT TREND</h3>
           <ResponsiveContainer width="100%" height="85%">
             <LineChart data={perfData}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
               <XAxis dataKey="t" hide />
               <YAxis stroke="#6c7086" fontSize={10} />
-              <Tooltip contentStyle={{ background:'#0a0a0f', border:'1px solid rgba(255,255,255,0.1)', fontSize:'0.8rem' }} itemStyle={{ color:'#00f2fe' }} />
+              <Tooltip contentStyle={{ background: '#0a0a0f', border: '1px solid rgba(255,255,255,0.1)', fontSize: '0.8rem' }} itemStyle={{ color: '#00f2fe' }} />
               <Line type="monotone" dataKey="v" stroke="#00f2fe" strokeWidth={2} dot={false} isAnimationActive={false} />
             </LineChart>
           </ResponsiveContainer>
@@ -1040,24 +1046,24 @@ export default function TrafficSimulation() {
 
           {/* ── CITY BLOCKS ── */}
           {[
-            [0,            0,           ROAD_NS_LEFT - 10,      ROAD_EW_TOP - 10],
-            [ROAD_NS_RIGHT + 10, 0,     W - ROAD_NS_RIGHT - 10, ROAD_EW_TOP - 10],
-            [0,            ROAD_EW_BOT + 10, ROAD_NS_LEFT - 10, H - ROAD_EW_BOT - 10],
+            [0, 0, ROAD_NS_LEFT - 10, ROAD_EW_TOP - 10],
+            [ROAD_NS_RIGHT + 10, 0, W - ROAD_NS_RIGHT - 10, ROAD_EW_TOP - 10],
+            [0, ROAD_EW_BOT + 10, ROAD_NS_LEFT - 10, H - ROAD_EW_BOT - 10],
             [ROAD_NS_RIGHT + 10, ROAD_EW_BOT + 10, W - ROAD_NS_RIGHT - 10, H - ROAD_EW_BOT - 10],
           ].map(([bx, by, bw, bh], qi) => (
             <g key={qi}>
               <rect x={bx} y={by} width={bw} height={bh} fill="#ccc5bd" />
               {/* 4 buildings per block */}
               {[
-                [bx + bw*0.06, by + bh*0.06, bw*0.40, bh*0.40],
-                [bx + bw*0.54, by + bh*0.06, bw*0.40, bh*0.40],
-                [bx + bw*0.06, by + bh*0.54, bw*0.40, bh*0.40],
-                [bx + bw*0.54, by + bh*0.54, bw*0.40, bh*0.40],
+                [bx + bw * 0.06, by + bh * 0.06, bw * 0.40, bh * 0.40],
+                [bx + bw * 0.54, by + bh * 0.06, bw * 0.40, bh * 0.40],
+                [bx + bw * 0.06, by + bh * 0.54, bw * 0.40, bh * 0.40],
+                [bx + bw * 0.54, by + bh * 0.54, bw * 0.40, bh * 0.40],
               ].map(([rx, ry, rw, rh], bi) =>
                 rw > 12 && rh > 12 ? (
                   <g key={bi}>
                     <rect x={rx} y={ry} width={rw} height={rh}
-                      fill={['#aec6e8','#f5dfa0','#b8ddb8','#f0bfbf'][bi]}
+                      fill={['#aec6e8', '#f5dfa0', '#b8ddb8', '#f0bfbf'][bi]}
                       stroke="#9e968e" strokeWidth={1} rx={2} />
                     {rw > 28 && rh > 28 && Array.from({ length: Math.floor(rh / 13) }).map((_, wi) =>
                       Array.from({ length: Math.floor(rw / 13) }).map((_, wj) => (
@@ -1074,14 +1080,14 @@ export default function TrafficSimulation() {
           ))}
 
           {/* ── KERB/PAVEMENT STRIPS ── */}
-          <rect x={ROAD_NS_LEFT - 10} y={0}            width={10} height={H}  fill="#bab3aa" />
-          <rect x={ROAD_NS_RIGHT}     y={0}            width={10} height={H}  fill="#bab3aa" />
-          <rect x={0} y={ROAD_EW_TOP - 10}             width={W}  height={10} fill="#bab3aa" />
-          <rect x={0} y={ROAD_EW_BOT}                  width={W}  height={10} fill="#bab3aa" />
+          <rect x={ROAD_NS_LEFT - 10} y={0} width={10} height={H} fill="#bab3aa" />
+          <rect x={ROAD_NS_RIGHT} y={0} width={10} height={H} fill="#bab3aa" />
+          <rect x={0} y={ROAD_EW_TOP - 10} width={W} height={10} fill="#bab3aa" />
+          <rect x={0} y={ROAD_EW_BOT} width={W} height={10} fill="#bab3aa" />
 
           {/* ── BLACK ROADS ── */}
-          <rect x={ROAD_NS_LEFT} y={0}        width={ROAD_W} height={H}      fill="#111111" />
-          <rect x={0}            y={ROAD_EW_TOP} width={W}  height={ROAD_W} fill="#111111" />
+          <rect x={ROAD_NS_LEFT} y={0} width={ROAD_W} height={H} fill="#111111" />
+          <rect x={0} y={ROAD_EW_TOP} width={W} height={ROAD_W} fill="#111111" />
 
           {/* ── LANE MARKINGS ── */}
           {/* NS dashes */}
@@ -1094,26 +1100,26 @@ export default function TrafficSimulation() {
           ))}
 
           {/* Yellow edge kerb lines */}
-          <line x1={ROAD_NS_LEFT}  y1={0} x2={ROAD_NS_LEFT}  y2={H} stroke="#e6c200" strokeWidth={2.5} />
+          <line x1={ROAD_NS_LEFT} y1={0} x2={ROAD_NS_LEFT} y2={H} stroke="#e6c200" strokeWidth={2.5} />
           <line x1={ROAD_NS_RIGHT} y1={0} x2={ROAD_NS_RIGHT} y2={H} stroke="#e6c200" strokeWidth={2.5} />
           <line x1={0} y1={ROAD_EW_TOP} x2={W} y2={ROAD_EW_TOP} stroke="#e6c200" strokeWidth={2.5} />
           <line x1={0} y1={ROAD_EW_BOT} x2={W} y2={ROAD_EW_BOT} stroke="#e6c200" strokeWidth={2.5} />
 
           {/* ── INTERSECTION ── */}
-          <rect x={IX1} y={IY1} width={IX2-IX1} height={IY2-IY1} fill="#111111" />
+          <rect x={IX1} y={IY1} width={IX2 - IX1} height={IY2 - IY1} fill="#111111" />
           {/* Yellow hatch pattern */}
           {Array.from({ length: 10 }).map((_, i) => (
-            <line key={`h1${i}`} x1={IX1 + i*16} y1={IY1} x2={IX1} y2={IY1 + i*16} stroke="rgba(230,194,0,0.18)" strokeWidth={1.5} />
+            <line key={`h1${i}`} x1={IX1 + i * 16} y1={IY1} x2={IX1} y2={IY1 + i * 16} stroke="rgba(230,194,0,0.18)" strokeWidth={1.5} />
           ))}
           {Array.from({ length: 10 }).map((_, i) => (
-            <line key={`h2${i}`} x1={IX1 + i*16} y1={IY2} x2={IX2} y2={IY1 + i*16} stroke="rgba(230,194,0,0.18)" strokeWidth={1.5} />
+            <line key={`h2${i}`} x1={IX1 + i * 16} y1={IY2} x2={IX2} y2={IY1 + i * 16} stroke="rgba(230,194,0,0.18)" strokeWidth={1.5} />
           ))}
 
           {/* ── CROSSWALKS ── */}
-          {[0,1,2,3,4].map(i => <rect key={`cN${i}`} x={IX1+10+i*24} y={IY1-20} width={14} height={18} fill="rgba(255,255,255,0.2)" rx={1} />)}
-          {[0,1,2,3,4].map(i => <rect key={`cS${i}`} x={IX1+10+i*24} y={IY2+2}  width={14} height={18} fill="rgba(255,255,255,0.2)" rx={1} />)}
-          {[0,1,2,3,4].map(i => <rect key={`cW${i}`} x={IX1-20} y={IY1+10+i*24} width={18} height={14} fill="rgba(255,255,255,0.2)" rx={1} />)}
-          {[0,1,2,3,4].map(i => <rect key={`cE${i}`} x={IX2+2}  y={IY1+10+i*24} width={18} height={14} fill="rgba(255,255,255,0.2)" rx={1} />)}
+          {[0, 1, 2, 3, 4].map(i => <rect key={`cN${i}`} x={IX1 + 10 + i * 24} y={IY1 - 20} width={14} height={18} fill="rgba(255,255,255,0.2)" rx={1} />)}
+          {[0, 1, 2, 3, 4].map(i => <rect key={`cS${i}`} x={IX1 + 10 + i * 24} y={IY2 + 2} width={14} height={18} fill="rgba(255,255,255,0.2)" rx={1} />)}
+          {[0, 1, 2, 3, 4].map(i => <rect key={`cW${i}`} x={IX1 - 20} y={IY1 + 10 + i * 24} width={18} height={14} fill="rgba(255,255,255,0.2)" rx={1} />)}
+          {[0, 1, 2, 3, 4].map(i => <rect key={`cE${i}`} x={IX2 + 2} y={IY1 + 10 + i * 24} width={18} height={14} fill="rgba(255,255,255,0.2)" rx={1} />)}
 
           {/* ── STOP LINES ── */}
           <line x1={ROAD_NS_LEFT} y1={STOP_POS.NS} x2={ROAD_NS_RIGHT} y2={STOP_POS.NS} stroke="white" strokeWidth={3} opacity="0.75" />
@@ -1122,10 +1128,10 @@ export default function TrafficSimulation() {
           <line x1={STOP_POS.WE} y1={ROAD_EW_TOP} x2={STOP_POS.WE} y2={ROAD_EW_BOT} stroke="white" strokeWidth={3} opacity="0.75" />
 
           {/* ── TRAFFIC LIGHT POLES ── */}
-          <Pole x={IX1-28} y={IY1-8}  green={ewGreen} />   {/* NW – controls E→ */}
-          <Pole x={IX2+28} y={IY1-8}  green={nsGreen} />   {/* NE – controls ↓S */}
-          <Pole x={IX1-28} y={IY2+8}  green={nsGreen} />   {/* SW – controls ↑N */}
-          <Pole x={IX2+28} y={IY2+8}  green={ewGreen} />   {/* SE – controls ←W */}
+          <Pole x={IX1 - 28} y={IY1 - 8} green={ewGreen} />   {/* NW – controls E→ */}
+          <Pole x={IX2 + 28} y={IY1 - 8} green={nsGreen} />   {/* NE – controls ↓S */}
+          <Pole x={IX1 - 28} y={IY2 + 8} green={nsGreen} />   {/* SW – controls ↑N */}
+          <Pole x={IX2 + 28} y={IY2 + 8} green={ewGreen} />   {/* SE – controls ←W */}
 
           {/* ── CARS ── */}
           <g filter="url(#carShadow)">

@@ -59,15 +59,17 @@ class TrafficSimulation {
     this.timeInPhase++;
 
     try {
-      const response = await axios.post('http://localhost:8000/predict', {
-        ns_queue: this.nsQueue,
-        ew_queue: this.ewQueue,
-        light: this.light,
-        time_in_phase: this.timeInPhase
-      }, { timeout: 100 }); // Fast timeout for real-time feel
+      const response = await axios.post('http://localhost:8000/get_signal', {
+        traffic: [this.nsQueue, this.nsQueue, this.ewQueue, this.ewQueue]
+      }, { timeout: 200 });
 
-      action = response.data.action;
-      // console.log("[AI] FastAPI Action:", action);
+      const modelSignal = response.data.signal;
+      if ((modelSignal === "EW_GREEN" && this.light === 0) || 
+          (modelSignal === "NS_GREEN" && this.light === 1)) {
+        action = 1;
+      } else {
+        action = 0;
+      }
     } catch (e) {
       // Fallback to local Q-Table logic if FastAPI is down
       const stateNs = Math.min(this.nsQueue, 10);
