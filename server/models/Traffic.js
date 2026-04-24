@@ -20,6 +20,11 @@ const trafficSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
+
+
+
+
+
 const Traffic = mongoose.model("Traffic", trafficSchema);
 
 export default Traffic;
