@@ -1,0 +1,48 @@
+Plotter_settings:
+  Output: 'output/plots'
+  Width: 1920
+  Height: 1080
+  Metrics:
+    - system_total_stopped
+    - system_total_waiting_time
+    - system_mean_waiting_time
+    - system_mean_speed
+
+Agent_settings:
+  Output_csv:   'output/csv'
+  Output_model: 'output/models'
+
+  Environment:
+    Traffic_type: 'high'          # <── high traffic, but models trained on low
+    Gui:          False
+    Num_seconds:  3600
+    Min_green:    10
+    Max_green:    50
+    Yellow_time:  4
+    Delta_time:   5
+
+  Instances:
+
+    Fixed_Test:
+      Agent_type: 'FIXED'
+      Runs: 1
+
+    QL_Test:
+      Agent_type: 'QL'
+      Runs: 1
+      Model: 'output/models/ql_run3.pkl'
+      Alpha:        0.1
+      Gamma:        0.99
+      Init_epsilon: 0.0
+      Min_epsilon:  0.0
+      Decay:        1.0
+
+    DQN_Test:
+      Agent_type: 'DQN'
+      Runs: 1
+      Model: 'output/models/dqn_run2'
+      Alpha:        0.0005
+      Gamma:        0.99
+      Init_epsilon: 0.0
+      Final_epsilon: 0.0
+      Exp_fraction:  1.0
