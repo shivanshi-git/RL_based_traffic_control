@@ -6,6 +6,8 @@ const Header = () => {
   return (
     <div className="flex flex-col items-center justify-center text-center mt-16 px-4">
 
+
+
       {/* Robot Image */}
       <img
         src={assets.header_img}
