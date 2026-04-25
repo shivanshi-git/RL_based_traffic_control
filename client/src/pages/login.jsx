@@ -29,6 +29,10 @@ const Login = () => {
     }
   };
 
+  const handleGoogleLogin = () => {
+    window.location.href = "https://localhost:5000/api/auth/google";
+  };
+
   return (
     <>
       <style>{`
@@ -104,7 +108,6 @@ const Login = () => {
           z-index: 2;
         }
 
-        /* car animations */
         .tr-car-h  { animation: trDriveH  4s linear infinite; }
         .tr-car-h2 { animation: trDriveH  6.5s linear infinite 2s; }
         .tr-car-v  { animation: trDriveV  5s linear infinite 1s; }
@@ -118,7 +121,6 @@ const Login = () => {
           to   { transform: translateY(110vh); }
         }
 
-        /* pulse dots */
         .tr-pdot { animation: trPulse 2s ease-in-out infinite; }
         .tr-pdot:nth-child(2) { animation-delay: 0.5s; }
         .tr-pdot:nth-child(3) { animation-delay: 1s; }
@@ -128,7 +130,6 @@ const Login = () => {
           50%      { r: 7; opacity: 1; }
         }
 
-        /* signal cycle */
         .tr-sig-g { animation: trSig 6s linear infinite; }
         .tr-sig-r { animation: trSig 6s linear infinite 3s; }
         @keyframes trSig {
@@ -176,7 +177,6 @@ const Login = () => {
           pointer-events: none;
         }
 
-        /* traffic light accent */
         .tr-tl-accent {
           position: absolute; right: 16px; top: 50%;
           transform: translateY(-50%);
@@ -201,7 +201,6 @@ const Login = () => {
           50%,100% { opacity: 0.15; }
         }
 
-        /* status bar */
         .tr-status-bar {
           display: flex; align-items: center; gap: 8px;
           margin-bottom: 36px;
@@ -224,7 +223,6 @@ const Login = () => {
           letter-spacing: 0.2em;
         }
 
-        /* title */
         .tr-title {
           font-size: 28px; font-weight: 700;
           color: #e8f5f0;
@@ -239,7 +237,6 @@ const Login = () => {
           margin-bottom: 32px;
         }
 
-        /* data chips */
         .tr-data-row { display: flex; gap: 12px; margin-bottom: 20px; }
         .tr-chip {
           flex: 1;
@@ -260,7 +257,6 @@ const Login = () => {
           transition: color 0.4s;
         }
 
-        /* form fields */
         .tr-field-group { margin-bottom: 16px; }
         .tr-field-label {
           font-family: 'Share Tech Mono', monospace;
@@ -294,7 +290,7 @@ const Login = () => {
           font-size: 11px; letter-spacing: 0.12em;
         }
 
-        /* submit button */
+        /* ── BUTTONS ── */
         .tr-btn {
           width: 100%; margin-top: 24px; padding: 14px;
           background: transparent;
@@ -316,7 +312,46 @@ const Login = () => {
         .tr-btn:hover { color: #aff0df; border-color: rgba(0,200,150,0.8); }
         .tr-btn:active { transform: scale(0.98); }
 
-        /* footer */
+        /* ── OR DIVIDER ── */
+        .tr-or-row {
+          display: flex; align-items: center; gap: 10px;
+          margin-top: 16px;
+        }
+        .tr-or-line {
+          flex: 1; height: 1px;
+          background: rgba(0,200,150,0.1);
+        }
+        .tr-or-text {
+          font-family: 'Share Tech Mono', monospace;
+          font-size: 10px;
+          color: rgba(255,255,255,0.2);
+          letter-spacing: 0.2em;
+        }
+
+        /* ── GOOGLE BUTTON ── */
+        .tr-btn-google {
+          width: 100%; margin-top: 12px; padding: 14px;
+          background: transparent;
+          border: 1px solid rgba(66,133,244,0.5);
+          color: #4285F4;
+          font-family: 'Rajdhani', sans-serif;
+          font-size: 15px; font-weight: 700;
+          letter-spacing: 0.35em; cursor: pointer;
+          position: relative; overflow: hidden;
+          transition: all 0.25s; border-radius: 3px;
+          display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .tr-btn-google::before {
+          content: '';
+          position: absolute; left: -100%; top: 0; bottom: 0; width: 100%;
+          background: rgba(66,133,244,0.08);
+          transition: left 0.3s ease;
+        }
+        .tr-btn-google:hover::before { left: 0; }
+        .tr-btn-google:hover { color: #90b4f8; border-color: rgba(66,133,244,0.8); }
+        .tr-btn-google:active { transform: scale(0.98); }
+
+        /* ── FOOTER ── */
         .tr-footer {
           margin-top: 20px;
           font-size: 12px; color: rgba(255,255,255,0.2);
@@ -327,7 +362,6 @@ const Login = () => {
         .tr-footer a { color: rgba(0,200,150,0.7); text-decoration: none; transition: color 0.2s; }
         .tr-footer a:hover { color: #00c896; }
 
-        /* responsive */
         @media (max-width: 640px) {
           .tr-city { display: none; }
           .tr-divider { display: none; }
@@ -347,75 +381,48 @@ const Login = () => {
             UPTIME: 99.8%
           </div>
 
-          <svg
-            className="tr-map-svg"
-            viewBox="0 0 370 600"
-            preserveAspectRatio="xMidYMid slice"
-            xmlns="http://www.w3.org/2000/svg"
-          >
+          <svg className="tr-map-svg" viewBox="0 0 370 600" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <filter id="trGlow">
                 <feGaussianBlur stdDeviation="2.5" result="blur" />
                 <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
               </filter>
             </defs>
-
-            {/* Buildings */}
-            {[
-              [20,20,80,70],[130,20,110,70],[270,20,90,70],
-              [20,140,80,100],[130,140,110,100],[270,140,90,100],
-              [20,300,80,90],[130,300,110,90],[270,300,90,90],
-              [20,450,80,130],[130,450,110,130],[270,450,90,130],
-            ].map(([x,y,w,h],i) => (
-              <rect key={i} x={x} y={y} width={w} height={h} rx="2"
-                fill="rgba(0,200,150,0.04)" stroke="rgba(0,200,150,0.12)" strokeWidth="0.5"/>
+            {[[20,20,80,70],[130,20,110,70],[270,20,90,70],[20,140,80,100],[130,140,110,100],[270,140,90,100],[20,300,80,90],[130,300,110,90],[270,300,90,90],[20,450,80,130],[130,450,110,130],[270,450,90,130]].map(([x,y,w,h],i) => (
+              <rect key={i} x={x} y={y} width={w} height={h} rx="2" fill="rgba(0,200,150,0.04)" stroke="rgba(0,200,150,0.12)" strokeWidth="0.5"/>
             ))}
-
-            {/* Window dots */}
             {[[50,45],[65,45],[50,58],[65,58],[160,40],[175,40],[190,40],[160,55],[175,55],[190,55]].map(([cx,cy],i) => (
               <circle key={i} cx={cx} cy={cy} r="2" fill={`rgba(0,200,150,${0.15 + (i%3)*0.07})`}/>
             ))}
-
-            {/* Horizontal roads */}
             {[[100,140],[250,300],[400,450]].map(([y1,y2],i) => (
               <g key={i}>
                 <rect x="0" y={y1} width="370" height={y2-y1} fill="rgba(255,255,255,0.015)"/>
                 <line x1="0" y1={y1} x2="370" y2={y1} stroke="rgba(0,200,150,0.25)" strokeWidth="1"/>
                 <line x1="0" y1={y2} x2="370" y2={y2} stroke="rgba(0,200,150,0.25)" strokeWidth="1"/>
-                <line x1="20"  y1={(y1+y2)/2} x2="100" y2={(y1+y2)/2} stroke="rgba(255,255,255,0.08)" strokeWidth="1" strokeDasharray="8,6"/>
+                <line x1="20" y1={(y1+y2)/2} x2="100" y2={(y1+y2)/2} stroke="rgba(255,255,255,0.08)" strokeWidth="1" strokeDasharray="8,6"/>
                 <line x1="130" y1={(y1+y2)/2} x2="240" y2={(y1+y2)/2} stroke="rgba(255,255,255,0.08)" strokeWidth="1" strokeDasharray="8,6"/>
                 <line x1="270" y1={(y1+y2)/2} x2="370" y2={(y1+y2)/2} stroke="rgba(255,255,255,0.08)" strokeWidth="1" strokeDasharray="8,6"/>
               </g>
             ))}
-
-            {/* Vertical roads */}
             {[[100,130],[240,270]].map(([x1,x2],i) => (
               <g key={i}>
                 <rect x={x1} y="0" width={x2-x1} height="600" fill="rgba(255,255,255,0.015)"/>
                 <line x1={x1} y1="0" x2={x1} y2="600" stroke="rgba(0,200,150,0.25)" strokeWidth="1"/>
                 <line x1={x2} y1="0" x2={x2} y2="600" stroke="rgba(0,200,150,0.25)" strokeWidth="1"/>
                 {[90,240,390,600].map((seg,j,arr) => (
-                  <line key={j} x1={(x1+x2)/2} y1={j===0?0:arr[j-1]} x2={(x1+x2)/2} y2={seg}
-                    stroke="rgba(255,255,255,0.08)" strokeWidth="1" strokeDasharray="8,6"/>
+                  <line key={j} x1={(x1+x2)/2} y1={j===0?0:arr[j-1]} x2={(x1+x2)/2} y2={seg} stroke="rgba(255,255,255,0.08)" strokeWidth="1" strokeDasharray="8,6"/>
                 ))}
               </g>
             ))}
-
-            {/* Intersection pulse dots */}
             {[[115,120,"#00c896"],[255,120,"#00c896"],[115,275,"#ff3b3b"],[255,275,"#00c896"],[115,425,"#00c896"],[255,425,"#ffc300"]].map(([cx,cy,fill],i) => (
               <circle key={i} cx={cx} cy={cy} r="4" fill={fill} opacity="0.7" className="tr-pdot"/>
             ))}
-
-            {/* Traffic light signals */}
             <rect x="104" y="110" width="5" height="9" rx="1" fill="#111" stroke="rgba(0,200,150,0.3)" strokeWidth="0.5"/>
             <circle cx="106.5" cy="112" r="1.2" fill="#ff3b3b" className="tr-sig-r"/>
             <circle cx="106.5" cy="116.5" r="1.2" fill="#00c896" className="tr-sig-g"/>
-
             <rect x="258" y="265" width="5" height="9" rx="1" fill="#111" stroke="rgba(0,200,150,0.3)" strokeWidth="0.5"/>
             <circle cx="260.5" cy="267" r="1.2" fill="#ff3b3b" className="tr-sig-r"/>
             <circle cx="260.5" cy="271.5" r="1.2" fill="#00c896" className="tr-sig-g"/>
-
-            {/* Animated cars */}
             <g className="tr-car-h" filter="url(#trGlow)">
               <rect x="5" y="107" width="14" height="7" rx="1.5" fill="#00c896" opacity="0.9"/>
               <circle cx="7" cy="114.5" r="1.5" fill="#333"/>
@@ -450,7 +457,6 @@ const Login = () => {
           <div className="tr-corner-tl" />
           <div className="tr-corner-br" />
 
-          {/* Traffic light accent */}
           <div className="tr-tl-accent">
             <div className="tr-tl-body">
               <div className="tr-tl-light tr-tl-r" />
@@ -459,17 +465,14 @@ const Login = () => {
             </div>
           </div>
 
-          {/* Status bar */}
           <div className="tr-status-bar">
             <div className="tr-status-dot" />
             <span className="tr-status-text">GRID ONLINE &nbsp;|&nbsp; SECTOR 7-C &nbsp;|&nbsp; 142 SIGNALS ACTIVE</span>
           </div>
 
-          {/* Title */}
           <div className="tr-title">Traffic Control<br />Operations</div>
           <div className="tr-subtitle">SMART CITY COMMAND INTERFACE</div>
 
-          {/* Live data chips */}
           <div className="tr-data-row">
             <div className="tr-chip">
               <span className="tr-chip-label">FLOW INDEX</span>
@@ -532,10 +535,28 @@ const Login = () => {
             </button>
           </form>
 
+          {/* ── OR divider ── */}
+          <div className="tr-or-row">
+            <div className="tr-or-line" />
+            <span className="tr-or-text">OR</span>
+            <div className="tr-or-line" />
+          </div>
+
+          {/* ── Google Button ── */}
+          <button type="button" className="tr-btn-google" onClick={handleGoogleLogin}>
+            <svg width="16" height="16" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+              <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+              <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+              <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+              <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+            </svg>
+            CONTINUE WITH GOOGLE
+          </button>
+
           {/* Footer */}
           <div className="tr-footer">
             <span>NEW OPERATOR?</span>
-            <Link to="/register" className="">REQUEST CLEARANCE →</Link>
+            <Link to="/register">REQUEST CLEARANCE →</Link>
           </div>
         </div>
       </div>
