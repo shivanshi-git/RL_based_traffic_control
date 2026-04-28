@@ -75,7 +75,12 @@ Capstone_project/
 
 ```
 ## Project Architecture
-(Add diagram later)
+<img width="780" height="387" alt="image" src="https://github.com/user-attachments/assets/05bd9263-eef1-4c1a-a094-913c5ed8bbb6" />
+
+<img width="776" height="382" alt="image" src="https://github.com/user-attachments/assets/92be5304-bbd0-4044-ab06-98d6bcc9a216" />
+
+<img width="786" height="387" alt="image" src="https://github.com/user-attachments/assets/6eba4970-00d9-4f5f-b966-b75606209b73" />
+
 
 ## Installation & Setup
 Steps to run locally.
