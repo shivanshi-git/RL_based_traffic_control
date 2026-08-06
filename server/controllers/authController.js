@@ -59,6 +59,10 @@ export const register = async (req, res) => {
       isVerified: false,
     });
 
+
+
+
+
     // ✅ SAFE EMAIL SEND (won’t crash register)
     try {
       await transporter.sendMail({

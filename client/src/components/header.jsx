@@ -6,6 +6,8 @@ const Header = () => {
   return (
     <div className="flex flex-col items-center justify-center text-center mt-16 px-4">
 
+
+
       {/* Robot Image */}
       <img
         src={assets.header_img}
@@ -15,7 +17,7 @@ const Header = () => {
 
       {/* Greeting */}
       <h3 className="text-lg text-gray-600 mb-2">
-        Hey Developer 👋
+        HEY Developer 👋
       </h3>
 
       {/* Main Heading */}

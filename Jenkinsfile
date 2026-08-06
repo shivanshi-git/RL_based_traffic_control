@@ -15,6 +15,18 @@ pipeline {
             }
         }
 
+        // 🔥 NEW: Force cleanup (fixes your issue)
+        stage('Force Cleanup Docker') {
+            steps {
+                bat '''
+                echo Removing conflicting containers...
+                docker rm -f traffic_mongo || exit 0
+                docker rm -f traffic_backend || exit 0
+                docker rm -f traffic_frontend || exit 0
+                '''
+            }
+        }
+
         stage('Build Docker Images') {
             steps {
                 bat 'docker compose build --no-cache'
@@ -35,15 +47,6 @@ pipeline {
         }
     }
 
-
-
-
-
-
-
-
-
-
     post {
         success {
             echo 'Deployment Successful 🚀'
@@ -53,11 +56,4 @@ pipeline {
         }
     }
 }
-
-
-
-
-
-
-
 

@@ -20,17 +20,25 @@ services:
       - SMTP_USER=himadribahuguna8@gmail.com
       - SMTP_PASS=baiabpxmrvrrmxtx
       - BASE_URL=http://localhost:5000
+    volumes:
+    - ./certs:/app/certs
 
-  frontend:
+  frontend:   # 👈 MUST be inside services
     build: ./client
     container_name: traffic_frontend
     ports:
       - "5173:5173"
     depends_on:
       - backend
+    volumes:
+      - ./certs:/app/certs   # 👈 required for HTTPS
 
 volumes:
   mongo_data:
+
+
+
+
 
 
 
