@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 import numpy as np
 from stable_baselines3 import DQN
 import os
@@ -7,7 +7,7 @@ import os
 app = FastAPI(title="Traffic RL Inference API")
 
 # Load model globally
-MODEL_PATH = "traffic_dqn_model.zip"
+MODEL_PATH = os.path.join(os.path.dirname(__file__), "traffic_dqn_model.zip")
 model = None
 
 @app.on_event("startup")
@@ -20,10 +20,11 @@ def load_model():
         print(f"Warning: Model not found at {MODEL_PATH}. Inference will fail.")
 
 class SimState(BaseModel):
-    ns_queue: int
-    ew_queue: int
-    light: int
-    time_in_phase: int
+    """The observation contract shared by the trainer and live simulator."""
+    ns_queue: int = Field(ge=0, le=20)
+    ew_queue: int = Field(ge=0, le=20)
+    light: int = Field(ge=0, le=1)
+    time_in_phase: int = Field(ge=0)
 
 @app.post("/predict")
 async def predict_action(state: SimState):
@@ -39,10 +40,12 @@ async def predict_action(state: SimState):
     ], dtype=np.float32)
     
     action, _states = model.predict(obs, deterministic=True)
+    next_light = state.light if int(action) == 0 else 1 - state.light
     
     return {
         "action": int(action),
-        "explanation": "Switch" if action == 1 else "Keep"
+        "signal": "NS_GREEN" if next_light == 0 else "EW_GREEN",
+        "explanation": "Switch phase" if action == 1 else "Keep current phase"
     }
 
 @app.get("/health")

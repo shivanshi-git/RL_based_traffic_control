@@ -221,7 +221,8 @@ All design assets and UI images are located within [`client/src/assets/`](file:/
 - `GET /api/auth/check`: Check session validity (Protected route).
 
 ### 2. Reinforcement Learning Microservice (`http://localhost:8000`)
-- `POST /get_signal`: Accepts traffic queue counts `[NS_lanes, EW_lanes]` and returns optimal signal (`NS_GREEN` or `EW_GREEN`).
+- `POST /predict`: Accepts `{ ns_queue, ew_queue, light, time_in_phase }` and returns a DQN action (`0` keep / `1` switch) plus the resulting signal.
+- `GET /health`: Reports whether the saved DQN model has loaded.
 
 ### 3. Socket.IO Real-Time Protocol (`ws://localhost:5000`)
 - **Server Output (`sim_update`)**:

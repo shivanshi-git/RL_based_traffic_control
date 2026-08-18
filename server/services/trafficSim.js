@@ -32,6 +32,7 @@ class TrafficSimulation {
     this.lanes = 4;
     this.intersection = 1;
     this.timeInPhase = 0;
+    this.minGreenSteps = 3;
     this.simMode = 'intersection';
     this.nsWait = [];
     this.ewWait = [];
@@ -58,25 +59,22 @@ class TrafficSimulation {
     this.cleared = 0;
     this.reward = 0;
     this.cumulativeReward = 0;
+    this.timeInPhase = 0;
     this.broadcastState();
   }
   async tick() {
-    // 1. Try to get action from FastAPI, fallback to Q-Table
+    // 1. Ask the trained DQN for an action, with the local Q-table as fallback.
     let action = 0;
     this.timeInPhase++;
 
     try {
-      const response = await axios.post('http://localhost:8000/get_signal', {
-        traffic: [this.nsQueue, this.nsQueue, this.ewQueue, this.ewQueue]
+      const response = await axios.post('http://localhost:8000/predict', {
+        ns_queue: this.nsQueue,
+        ew_queue: this.ewQueue,
+        light: this.light,
+        time_in_phase: this.timeInPhase
       }, { timeout: 200 });
-
-      const modelSignal = response.data.signal;
-      if ((modelSignal === "EW_GREEN" && this.light === 0) || 
-          (modelSignal === "NS_GREEN" && this.light === 1)) {
-        action = 1;
-      } else {
-        action = 0;
-      }
+      action = response.data.action === 1 ? 1 : 0;
     } catch (e) {
       // Fallback to local Q-Table logic if FastAPI is down
       const stateNs = Math.min(this.nsQueue, 10);
@@ -89,7 +87,8 @@ class TrafficSimulation {
 
     // 2. Apply Agent Action
     let switched = false;
-    if (action === 1) {
+    // Never cut a green phase short. This is both safer and matches training.
+    if (action === 1 && this.timeInPhase >= this.minGreenSteps) {
       this.light = 1 - this.light;
       this.timeInPhase = 0;
       switched = true;
@@ -119,12 +118,12 @@ class TrafficSimulation {
     this.ewWait = this.ewWait.map(t => t + 1);
 
     if (Math.random() < this.spawnRate) {
-      this.nsQueue = Math.min(this.nsQueue + 1, 10);
+      this.nsQueue = Math.min(this.nsQueue + 1, 20);
       this.nsWait.push(0);
     }
     if (this.simMode === 'intersection') {
       if (Math.random() < this.spawnRate) {
-        this.ewQueue = Math.min(this.ewQueue + 1, 10);
+        this.ewQueue = Math.min(this.ewQueue + 1, 20);
         this.ewWait.push(0);
       }
     } else {

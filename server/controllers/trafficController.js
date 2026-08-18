@@ -11,13 +11,24 @@ let liveData = {
 // ================= RL SIGNAL =================
 export const getRLSignal = async (req, res) => {
   try {
-    const { traffic } = req.body;
+    const { traffic, light = 0, timeInPhase = 0 } = req.body;
+    if (!Array.isArray(traffic) || traffic.length < 2) {
+      return res.status(400).json({ error: "traffic must contain NS and EW queue counts" });
+    }
 
-    const response = await axios.post("http://127.0.0.1:8000/get_signal", {
-      traffic
+    const nsQueue = Math.min(20, Math.max(0, Number(traffic[0]) + Number(traffic[1] || 0)));
+    const ewQueue = Math.min(20, Math.max(0, Number(traffic[2] || 0) + Number(traffic[3] || 0)));
+
+    const response = await axios.post("http://127.0.0.1:8000/predict", {
+      ns_queue: nsQueue,
+      ew_queue: ewQueue,
+      light,
+      time_in_phase: timeInPhase
     });
 
-    const { signal, state, reward } = response.data;
+    const { action, signal } = response.data;
+    const state = [nsQueue, ewQueue, light, timeInPhase];
+    const reward = -(nsQueue + ewQueue);
 
     await Traffic.create({
       state: traffic,
@@ -30,7 +41,8 @@ export const getRLSignal = async (req, res) => {
       type: "RL",
       signal,
       state,
-      reward
+      reward,
+      action
     });
 
   } catch (err) {

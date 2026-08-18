@@ -13,7 +13,7 @@ class TrafficEnv(gym.Env):
     Custom Environment that follows gymnasium interface.
     This environment simulates a 4-way intersection.
     """
-    def __init__(self):
+    def __init__(self, max_steps=300, min_green_steps=3):
         super(TrafficEnv, self).__init__()
         # Actions: 0 = Keep current light, 1 = Switch light
         self.action_space = spaces.Discrete(2)
@@ -23,6 +23,8 @@ class TrafficEnv(gym.Env):
         self.observation_space = spaces.Box(low=0, high=1, shape=(4,), dtype=np.float32)
         
         self.max_queue = 20
+        self.max_steps = max_steps
+        self.min_green_steps = min_green_steps
         self.reset()
 
     def reset(self, seed=None, options=None):
@@ -31,6 +33,7 @@ class TrafficEnv(gym.Env):
         self.ew_queue = 0
         self.light = 0 # 0: NS, 1: EW
         self.time_in_phase = 0
+        self.steps = 0
         
         return self._get_obs(), {}
 
@@ -43,11 +46,12 @@ class TrafficEnv(gym.Env):
         ], dtype=np.float32)
 
     def step(self, action):
+        self.steps += 1
         self.time_in_phase += 1
         
         # Apply Action
         switched = False
-        if action == 1:
+        if action == 1 and self.time_in_phase >= self.min_green_steps:
             self.light = 1 - self.light
             self.time_in_phase = 0
             switched = True
@@ -59,24 +63,27 @@ class TrafficEnv(gym.Env):
         
         # Departure
         cleared = 0
+        # Match the default four-lane dashboard intersection: two vehicles can
+        # leave a green approach on each simulation step.
+        service_rate = 2
         if self.light == 0 and self.ns_queue > 0:
-            self.ns_queue -= 1
-            cleared = 1
+            cleared = min(self.ns_queue, service_rate)
+            self.ns_queue -= cleared
         elif self.light == 1 and self.ew_queue > 0:
-            self.ew_queue -= 1
-            cleared = 1
+            cleared = min(self.ew_queue, service_rate)
+            self.ew_queue -= cleared
             
-        # Reward Function
-        # Penalize long queues
-        reward = -(self.ns_queue + self.ew_queue)
-        # Bonus for clearing traffic
-        reward += cleared * 5.0
-        # Penalty for switching to avoid flickering
+        # Penalize queues, reward throughput, and discourage phase flicker.
+        reward = -1.5 * (self.ns_queue + self.ew_queue)
+        reward += cleared * 10.0
         if switched:
-            reward -= 2.0
+            reward -= 5.0
+        # A queue that has saturated should be treated as a serious failure.
+        if self.ns_queue == self.max_queue or self.ew_queue == self.max_queue:
+            reward -= 10.0
             
         terminated = False
-        truncated = False # We handle episode length in training loop or via wrapper
+        truncated = self.steps >= self.max_steps
         
         return self._get_obs(), reward, terminated, truncated, {"cleared": cleared}
 
