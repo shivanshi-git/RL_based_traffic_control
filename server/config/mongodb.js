@@ -6,12 +6,11 @@ const connectDB = async () => {
       throw new Error("MONGO_URI not found in environment variables");
     }
 
-    await mongoose.connect(process.env.MONGO_URI);
-
+    await mongoose.connect(process.env.MONGO_URI, { serverSelectionTimeoutMS: 2000 });
     console.log(" MongoDB connected successfully");
   } catch (error) {
     console.error("MongoDB connection failed:", error.message);
-    // Don't exit — let the server still run for simulation
+    console.log("⚠️ Running server with in-memory auth fallback.");
   }
 };
 

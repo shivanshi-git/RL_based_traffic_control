@@ -3,6 +3,10 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import transporter from "../config/nodemailer.js";
+import mongoose from "mongoose";
+
+// ================= IN-MEMORY DB FALLBACK =================
+const mockUsers = new Map();
 
 // ================= JWT =================
 const generateToken = (id) => {
@@ -32,32 +36,49 @@ export const register = async (req, res) => {
       });
     }
 
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({
-        success: false,
-        message: "User already exists",
-      });
-    }
-
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Generate OTP
     const otp = crypto.randomInt(100000, 999999).toString();
 
-    const hashedOtp = crypto
-      .createHash("sha256")
-      .update(otp)
-      .digest("hex");
+    // Check if Mongoose is connected to MongoDB
+    if (mongoose.connection.readyState === 1) {
+      const existingUser = await User.findOne({ email });
+      if (existingUser) {
+        return res.status(400).json({
+          success: false,
+          message: "User already exists",
+        });
+      }
 
-    const user = await User.create({
-      name,
-      email,
-      password: hashedPassword,
-      verificationOtp: hashedOtp,
-      verificationOtpExpireAt: Date.now() + 10 * 60 * 1000,
-      isVerified: false,
-    });
+      const hashedOtp = crypto
+        .createHash("sha256")
+        .update(otp)
+        .digest("hex");
+
+      await User.create({
+        name,
+        email,
+        password: hashedPassword,
+        verificationOtp: hashedOtp,
+        verificationOtpExpireAt: Date.now() + 10 * 60 * 1000,
+        isVerified: true, // Set to true for smooth local dev
+      });
+    } else {
+      // In-memory fallback
+      if (mockUsers.has(email)) {
+        return res.status(400).json({
+          success: false,
+          message: "User already exists",
+        });
+      }
+      mockUsers.set(email, {
+        _id: "mock_" + Date.now(),
+        name,
+        email,
+        password: hashedPassword,
+        isVerified: true
+      });
+      console.log("⚠️ Stored user in mock memory store:", email);
+    }
 
 
 
@@ -99,8 +120,13 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
+    let user = null;
 
-    const user = await User.findOne({ email });
+    if (mongoose.connection.readyState === 1) {
+      user = await User.findOne({ email });
+    } else {
+      user = mockUsers.get(email);
+    }
 
     if (!user) {
       return res.status(404).json({
@@ -129,7 +155,7 @@ export const login = async (req, res) => {
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: false, // (later change to true in production HTTPS)
+      secure: false,
       sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
@@ -137,6 +163,7 @@ export const login = async (req, res) => {
     return res.json({
       success: true,
       message: "Login successful",
+      user: { name: user.name, email: user.email }
     });
 
   } catch (error) {

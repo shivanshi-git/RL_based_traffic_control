@@ -25,7 +25,8 @@ const Login = () => {
       alert(res.data.message || "ACCESS GRANTED");
       navigate("/setup-automation");
     } catch (error) {
-      alert(error.response?.data?.message || "ACCESS DENIED");
+      const msg = error.response?.data?.message || error.message || "Login failed";
+      alert(`${msg}\n\nNote: If you have not registered yet, click 'REQUEST CLEARANCE →' at the bottom to register first!`);
     }
   };
 

@@ -1,0 +1,5 @@
+names:
+  0: car
+path: e:\Capstone_project\Capstone_project\dataset
+train: images/train
+val: images/val
